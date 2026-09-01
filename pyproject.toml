@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-reliability-lab"
+version = "0.1.0"
+description = "Deterministic simulations for testing coding-agent orchestration reliability."
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Tanmay Dixit"}]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.12"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
