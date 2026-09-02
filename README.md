@@ -15,6 +15,19 @@ This repository starts with a deterministic replay model that makes that failure
 
 The tests demonstrate the failure before the fix and the expected scoped behavior afterward. This is a simulation of an orchestration failure mode, not a claim about model quality or production-scale performance.
 
+## Second milestone: retry/replay idempotency
+
+Coding agents often retry after a crash or transport failure. A dangerous window occurs when a tool side effect succeeds but its acknowledgement is lost: replay can emit the same logical operation again.
+
+The second deterministic model makes that boundary explicit:
+
+- `naive` replay applies every tool request, so an exact retry duplicates the side effect;
+- `idempotent` replay records a stable `operation_id` and suppresses exact retries;
+- reusing one operation identity for a different tool or payload fails closed;
+- request ordering remains explicit and deterministic.
+
+The model does not claim that every real tool can be made idempotent by keying alone. It isolates the orchestration contract a runtime needs before retry/replay can be safe.
+
 ## Run
 
 ```bash
