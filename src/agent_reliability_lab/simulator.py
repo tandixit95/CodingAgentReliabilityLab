@@ -9,6 +9,10 @@ from .events import Event, EventKind
 ReducerMode = Literal["naive", "scoped"]
 
 
+class TerminalStateConflict(ValueError):
+    """Raised when an active turn emits incompatible events after termination."""
+
+
 @dataclass(frozen=True, slots=True)
 class RunState:
     active_run_id: str
@@ -18,6 +22,8 @@ class RunState:
     failed: bool = False
     accepted_events: tuple[int, ...] = ()
     ignored_events: tuple[int, ...] = ()
+    terminal_kind: EventKind | None = None
+    terminal_payload: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,17 +36,43 @@ def _belongs_to_active_turn(state: RunState, event: Event) -> bool:
     return event.run_id == state.active_run_id and event.turn_id == state.active_turn_id
 
 
+def _handle_event_after_terminal(state: RunState, event: Event) -> RunState:
+    if event.kind is state.terminal_kind and event.payload == state.terminal_payload:
+        return replace(state, ignored_events=state.ignored_events + (event.sequence,))
+
+    prior = state.terminal_kind.value if state.terminal_kind is not None else "unknown"
+    raise TerminalStateConflict(
+        "active turn emitted an incompatible event after termination: "
+        f"existing={prior!r} incoming={event.kind.value!r}"
+    )
+
+
 def _apply_event(state: RunState, event: Event, mode: ReducerMode) -> RunState:
     if mode == "scoped" and not _belongs_to_active_turn(state, event):
         return replace(state, ignored_events=state.ignored_events + (event.sequence,))
+    if mode == "scoped" and state.terminal:
+        return _handle_event_after_terminal(state, event)
 
     next_state = replace(state, accepted_events=state.accepted_events + (event.sequence,))
     if event.kind is EventKind.OUTPUT:
         return replace(next_state, output=event.payload)
     if event.kind is EventKind.COMPLETED:
-        return replace(next_state, terminal=True, output=event.payload or next_state.output)
+        return replace(
+            next_state,
+            terminal=True,
+            terminal_kind=event.kind,
+            terminal_payload=event.payload,
+            output=event.payload or next_state.output,
+        )
     if event.kind is EventKind.FAILED:
-        return replace(next_state, terminal=True, failed=True, output=event.payload)
+        return replace(
+            next_state,
+            terminal=True,
+            failed=True,
+            terminal_kind=event.kind,
+            terminal_payload=event.payload,
+            output=event.payload,
+        )
     raise AssertionError(f"unhandled event kind: {event.kind}")
 
 
@@ -50,8 +82,10 @@ def replay(
     """Replay events deterministically in sequence order.
 
     ``naive`` models the orchestration bug where every completion on a shared
-    event stream can terminate the active parent. ``scoped`` accepts terminal
-    and output events only from the active run/turn identity.
+    event stream can terminate the active parent. ``scoped`` accepts events
+    only from the active run/turn identity and fails closed if that turn emits
+    a non-identical event after reaching a terminal state. Exact terminal
+    replays are treated as duplicates and ignored.
     """
 
     if mode not in ("naive", "scoped"):

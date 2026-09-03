@@ -2,7 +2,7 @@
 
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
 from .events import Event, EventKind
-from .simulator import RunState, SimulationResult, replay
+from .simulator import RunState, SimulationResult, TerminalStateConflict, replay
 
 __all__ = [
     "EffectReplayResult",
@@ -12,6 +12,7 @@ __all__ = [
     "IdempotencyConflict",
     "RunState",
     "SimulationResult",
+    "TerminalStateConflict",
     "replay",
     "replay_effects",
 ]

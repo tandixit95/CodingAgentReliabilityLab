@@ -28,6 +28,19 @@ The second deterministic model makes that boundary explicit:
 
 The model does not claim that every real tool can be made idempotent by keying alone. It isolates the orchestration contract a runtime needs before retry/replay can be safe.
 
+## Third milestone: ambiguous terminal states
+
+A turn can also receive contradictory terminal events after retries, reconnects, or competing runtime paths. Silently accepting whichever event arrives last makes the final result order-dependent.
+
+The scoped replay model now makes terminal finality explicit:
+
+- the first active-turn terminal event establishes the terminal outcome;
+- an exact replay of that terminal event is treated as a duplicate and ignored;
+- a conflicting terminal event fails closed instead of overwriting the first outcome;
+- any later same-turn output after termination also fails closed; foreign run/turn events remain ignored by identity.
+
+This is a strict deterministic orchestration contract, not a claim that every production event protocol must use the same terminal semantics.
+
 ## Run
 
 ```bash
@@ -42,4 +55,4 @@ PYTHONPATH=src pytest
 
 ## Roadmap
 
-Planned evidence-backed milestones include retry/replay idempotency, ambiguous terminal states, approval interruptions, partial-progress recovery, failure injection, trace lineage, and evaluation metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
+Planned evidence-backed milestones include approval interruptions, partial-progress recovery, failure injection, trace lineage, and evaluation metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
