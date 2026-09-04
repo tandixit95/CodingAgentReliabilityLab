@@ -41,6 +41,20 @@ The scoped replay model now makes terminal finality explicit:
 
 This is a strict deterministic orchestration contract, not a claim that every production event protocol must use the same terminal semantics.
 
+## Fourth milestone: approval interruptions
+
+Approval-gated tool calls can be interrupted between request, human decision, and execution. A replay must not treat an old approval as permission for a changed operation.
+
+The approval replay model now enforces that boundary explicitly:
+
+- execution before an approval decision fails closed;
+- approval or denial is bound to the exact `operation_id`, tool, and payload requested;
+- denial remains authoritative on replay;
+- changing the tool or payload after approval invalidates the binding and fails closed;
+- conflicting approval decisions and ambiguous event ordering are rejected.
+
+This models an orchestration safety contract only. It does not claim to implement identity, authentication, authorization policy, or human-review UX for a production agent system.
+
 ## Run
 
 ```bash
