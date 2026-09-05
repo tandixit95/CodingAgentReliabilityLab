@@ -1,72 +1,79 @@
 # Coding Agent Reliability Lab
 
-A small, evidence-first lab for reproducing and preventing orchestration failures in long-running coding agents.
+[![Tests](https://github.com/tandixit95/CodingAgentReliabilityLab/actions/workflows/tests.yml/badge.svg)](https://github.com/tandixit95/CodingAgentReliabilityLab/actions/workflows/tests.yml)
 
-## First milestone: stale child completion
+Reproducible failure cases for coding-agent orchestration: stale child events,
+conflicting terminal states, replayed tool effects, and approvals that must survive
+interruptions without silently authorizing a different operation.
 
-Nested agents often share an event transport. If the parent runtime treats every `completed` event as terminal, a child completion can end the parent turn early or overwrite the parent's final output.
+**Start here:** [crash-recovery experiment](docs/DURABLE_EXECUTION.md) ·
+[simulation milestones](docs/SIMULATION_MILESTONES.md) · [tests](tests)
 
-This repository starts with a deterministic replay model that makes that failure explicit:
+## What is implemented
 
-- `naive` reducer: accepts every event on the shared stream;
-- `scoped` reducer: accepts output/terminal events only from the active run and turn identity;
-- immutable ordered events make a scenario exactly replayable;
-- ambiguous event ordering fails closed rather than silently changing the outcome.
+| Boundary | Executable evidence | Scope |
+|---|---|---|
+| Parent/child event identity | Naive and scoped reducers, terminal-conflict tests | Deterministic event simulation |
+| Retry and approval binding | Exact operation/tool/payload matching, sticky denial | Deterministic event simulation |
+| Restart recovery | SQLite-backed approvals, effect and completion in one transaction | Inert local database effect only |
+| Crash window | Real child-process termination before/after effect and commit | Process crash, not power-loss testing |
+| Concurrent replay | Six independently launched worker processes, one recorded effect | One local SQLite database |
 
-The tests demonstrate the failure before the fix and the expected scoped behavior afterward. This is a simulation of an orchestration failure mode, not a claim about model quality or production-scale performance.
+The naive split-transaction baseline duplicates the local effect after a crash.
+The transactional version either rolls back the uncommitted effect or recognizes
+an already committed operation on restart. These are testable engineering
+contracts, **not a claim of exactly-once execution for arbitrary remote tools**.
 
-## Second milestone: retry/replay idempotency
+## Run locally
 
-Coding agents often retry after a crash or transport failure. A dangerous window occurs when a tool side effect succeeds but its acknowledgement is lost: replay can emit the same logical operation again.
-
-The second deterministic model makes that boundary explicit:
-
-- `naive` replay applies every tool request, so an exact retry duplicates the side effect;
-- `idempotent` replay records a stable `operation_id` and suppresses exact retries;
-- reusing one operation identity for a different tool or payload fails closed;
-- request ordering remains explicit and deterministic.
-
-The model does not claim that every real tool can be made idempotent by keying alone. It isolates the orchestration contract a runtime needs before retry/replay can be safe.
-
-## Third milestone: ambiguous terminal states
-
-A turn can also receive contradictory terminal events after retries, reconnects, or competing runtime paths. Silently accepting whichever event arrives last makes the final result order-dependent.
-
-The scoped replay model now makes terminal finality explicit:
-
-- the first active-turn terminal event establishes the terminal outcome;
-- an exact replay of that terminal event is treated as a duplicate and ignored;
-- a conflicting terminal event fails closed instead of overwriting the first outcome;
-- any later same-turn output after termination also fails closed; foreign run/turn events remain ignored by identity.
-
-This is a strict deterministic orchestration contract, not a claim that every production event protocol must use the same terminal semantics.
-
-## Fourth milestone: approval interruptions
-
-Approval-gated tool calls can be interrupted between request, human decision, and execution. A replay must not treat an old approval as permission for a changed operation.
-
-The approval replay model now enforces that boundary explicitly:
-
-- execution before an approval decision fails closed;
-- approval or denial is bound to the exact `operation_id`, tool, and payload requested;
-- denial remains authoritative on replay;
-- changing the tool or payload after approval invalidates the binding and fails closed;
-- conflicting approval decisions and ambiguous event ordering are rejected.
-
-This models an orchestration safety contract only. It does not claim to implement identity, authentication, authorization policy, or human-review UX for a production agent system.
-
-## Run
+Python 3.11 or newer; no model weights, API keys, or external services required.
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
 python -m pytest
+ruff check .
+ruff format --check .
 ```
 
-Or without installing the package:
+Run only the crash/restart and concurrent-worker experiment:
 
 ```bash
-PYTHONPATH=src pytest
+python -m pytest tests/test_durable_sandbox.py -v
 ```
 
-## Roadmap
+## Minimal durable example
 
-Planned evidence-backed milestones include approval interruptions, partial-progress recovery, failure injection, trace lineage, and evaluation metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
+```python
+from tempfile import TemporaryDirectory
+from pathlib import Path
+from agent_reliability_lab import DurableSandbox, LocalOperation
+
+with TemporaryDirectory() as directory:
+    database = Path(directory) / "sandbox.sqlite3"
+    operation = LocalOperation("op-1", "record_note", "harmless local evidence")
+    first = DurableSandbox(database)
+    first.request(operation)
+    first.decide(operation, "approved")
+    assert first.execute(operation) is True
+
+    restarted = DurableSandbox(database)
+    assert restarted.execute(operation) is False
+    assert restarted.notes() == (("op-1", "harmless local evidence"),)
+```
+
+## Limitations and next boundary
+
+The effect is an inert row in the same database as its approval and completion
+record. Moving it to an HTTP service, email system, shell command, or separate
+filesystem breaks that atomic boundary. Such integrations require an explicit
+remote idempotency/reconciliation contract; this lab does not supply one.
+
+There is no production authentication service, distributed consensus, real model
+evaluation, external adoption claim, or benchmark of production throughput.
+Checkpoint lineage and recovery spanning multiple systems remain future work.
+
+This is an AI-assisted independent engineering project. Implementation and tests
+are inspectable; automated validation is not represented as independent human
+review. No employer code, data, or private operational telemetry is included.

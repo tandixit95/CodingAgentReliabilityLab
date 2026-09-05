@@ -9,6 +9,7 @@ from .approvals import (
     ApprovalRequired,
     replay_approval,
 )
+from .durable import DurableSandbox, LocalOperation
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
 from .events import Event, EventKind
 from .simulator import RunState, SimulationResult, TerminalStateConflict, replay
@@ -20,11 +21,13 @@ __all__ = [
     "ApprovalEvent",
     "ApprovalReplayResult",
     "ApprovalRequired",
+    "DurableSandbox",
     "EffectReplayResult",
     "EffectRequest",
     "Event",
     "EventKind",
     "IdempotencyConflict",
+    "LocalOperation",
     "RunState",
     "SimulationResult",
     "TerminalStateConflict",
