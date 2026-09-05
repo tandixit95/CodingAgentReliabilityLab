@@ -7,6 +7,7 @@ conflicting terminal states, replayed tool effects, and approvals that must surv
 interruptions without silently authorizing a different operation.
 
 **Start here:** [crash-recovery experiment](docs/DURABLE_EXECUTION.md) ·
+[checkpoint-recovery experiment](docs/CHECKPOINT_RECOVERY.md) ·
 [simulation milestones](docs/SIMULATION_MILESTONES.md) · [tests](tests)
 
 ## What is implemented
@@ -18,6 +19,7 @@ interruptions without silently authorizing a different operation.
 | Restart recovery | SQLite-backed approvals, effect and completion in one transaction | Inert local database effect only |
 | Crash window | Real child-process termination before/after effect and commit | Process crash, not power-loss testing |
 | Concurrent replay | Six independently launched worker processes, one recorded effect | One local SQLite database |
+| Partial-progress recovery | Persistent checkpoint head, exact plan binding, stale-lineage rejection | One local SQLite checkpoint store |
 
 The naive split-transaction baseline duplicates the local effect after a crash.
 The transactional version either rolls back the uncommitted effect or recognizes
@@ -72,7 +74,7 @@ remote idempotency/reconciliation contract; this lab does not supply one.
 
 There is no production authentication service, distributed consensus, real model
 evaluation, external adoption claim, or benchmark of production throughput.
-Checkpoint lineage and recovery spanning multiple systems remain future work.
+Checkpoint lineage for a single local recovery store is implemented; reconciliation spanning multiple systems remains future work.
 
 This is an AI-assisted independent engineering project. Implementation and tests
 are inspectable; automated validation is not represented as independent human

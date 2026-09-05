@@ -55,6 +55,26 @@ The approval replay model now enforces that boundary explicitly:
 
 This models an orchestration safety contract only. It does not claim to implement identity, authentication, authorization policy, or human-review UX for a production agent system.
 
+## Fifth milestone: checkpoint lineage and partial-progress recovery
+
+A multi-step run can recover from the wrong checkpoint after a restart. If an older
+checkpoint is accepted after later progress already committed, the scheduler can
+reissue work that belongs to the current lineage.
+
+The file-backed recovery model makes that boundary explicit:
+
+- each run is bound to the exact ordered operation plan, including tool and payload;
+- checkpoints form one persisted parent/sequence lineage with a single authoritative head;
+- exact replay of an already committed checkpoint advance is idempotent;
+- resume is allowed only from the current checkpoint and returns only unfinished operations;
+- stale parents, forked lineage, changed plans, reused checkpoint identities, and impossible progress fail closed.
+
+The failure test demonstrates that naively resuming an older checkpoint would schedule
+an operation already completed in the current lineage. The model prevents that replay;
+it does not claim distributed consensus or atomicity across remote systems.
+
+See `docs/CHECKPOINT_RECOVERY.md` for the bounded experiment and limitations.
+
 ## Run
 
 ```bash
@@ -69,4 +89,4 @@ PYTHONPATH=src pytest
 
 ## Roadmap
 
-Further milestones include checkpoint lineage, partial-progress recovery beyond a single local transaction, richer failure injection, and evaluation metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
+Further milestones include cross-system reconciliation, richer failure injection, trace evaluation, and release metrics. Each milestone should add a reproducible failure case and tests before making a public claim.

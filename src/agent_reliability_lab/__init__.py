@@ -12,6 +12,13 @@ from .approvals import (
 from .durable import DurableSandbox, LocalOperation
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
 from .events import Event, EventKind
+from .recovery import (
+    CheckpointConflict,
+    CheckpointStore,
+    RecoveryCheckpoint,
+    RecoveryOperation,
+    StaleCheckpoint,
+)
 from .simulator import RunState, SimulationResult, TerminalStateConflict, replay
 
 __all__ = [
@@ -21,6 +28,8 @@ __all__ = [
     "ApprovalEvent",
     "ApprovalReplayResult",
     "ApprovalRequired",
+    "CheckpointConflict",
+    "CheckpointStore",
     "DurableSandbox",
     "EffectReplayResult",
     "EffectRequest",
@@ -28,8 +37,11 @@ __all__ = [
     "EventKind",
     "IdempotencyConflict",
     "LocalOperation",
+    "RecoveryCheckpoint",
+    "RecoveryOperation",
     "RunState",
     "SimulationResult",
+    "StaleCheckpoint",
     "TerminalStateConflict",
     "replay",
     "replay_approval",
