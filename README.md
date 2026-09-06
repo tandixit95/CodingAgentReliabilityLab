@@ -8,6 +8,7 @@ interruptions without silently authorizing a different operation.
 
 **Start here:** [crash-recovery experiment](docs/DURABLE_EXECUTION.md) ·
 [checkpoint-recovery experiment](docs/CHECKPOINT_RECOVERY.md) ·
+[cross-system reconciliation](docs/CROSS_SYSTEM_RECONCILIATION.md) ·
 [simulation milestones](docs/SIMULATION_MILESTONES.md) · [tests](tests)
 
 ## What is implemented
@@ -20,6 +21,7 @@ interruptions without silently authorizing a different operation.
 | Crash window | Real child-process termination before/after effect and commit | Process crash, not power-loss testing |
 | Concurrent replay | Six independently launched worker processes, one recorded effect | One local SQLite database |
 | Partial-progress recovery | Persistent checkpoint head, exact plan binding, stale-lineage rejection | One local SQLite checkpoint store |
+| Cross-system reconciliation | Provider readback + exact idempotency evidence before retry | Deterministic provider-evidence model |
 
 The naive split-transaction baseline duplicates the local effect after a crash.
 The transactional version either rolls back the uncommitted effect or recognizes
@@ -74,7 +76,7 @@ remote idempotency/reconciliation contract; this lab does not supply one.
 
 There is no production authentication service, distributed consensus, real model
 evaluation, external adoption claim, or benchmark of production throughput.
-Checkpoint lineage for a single local recovery store is implemented; reconciliation spanning multiple systems remains future work.
+Checkpoint lineage for a single local recovery store and a deterministic cross-system reconciliation contract are implemented; no real provider integration is claimed.
 
 This is an AI-assisted independent engineering project. Implementation and tests
 are inspectable; automated validation is not represented as independent human

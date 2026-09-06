@@ -12,6 +12,16 @@ from .approvals import (
 from .durable import DurableSandbox, LocalOperation
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
 from .events import Event, EventKind
+from .reconciliation import (
+    ExternalOperation,
+    ProviderEvidence,
+    ProviderReadbackState,
+    ReconciliationConflict,
+    ReconciliationDecision,
+    RemoteStateAmbiguous,
+    RetrySafetyUnknown,
+    reconcile_lost_ack,
+)
 from .recovery import (
     CheckpointConflict,
     CheckpointStore,
@@ -35,14 +45,22 @@ __all__ = [
     "EffectRequest",
     "Event",
     "EventKind",
+    "ExternalOperation",
     "IdempotencyConflict",
     "LocalOperation",
+    "ProviderEvidence",
+    "ProviderReadbackState",
+    "ReconciliationConflict",
+    "ReconciliationDecision",
     "RecoveryCheckpoint",
     "RecoveryOperation",
+    "RemoteStateAmbiguous",
+    "RetrySafetyUnknown",
     "RunState",
     "SimulationResult",
     "StaleCheckpoint",
     "TerminalStateConflict",
+    "reconcile_lost_ack",
     "replay",
     "replay_approval",
     "replay_effects",

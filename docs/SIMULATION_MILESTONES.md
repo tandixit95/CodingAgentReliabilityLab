@@ -75,6 +75,23 @@ it does not claim distributed consensus or atomicity across remote systems.
 
 See `docs/CHECKPOINT_RECOVERY.md` for the bounded experiment and limitations.
 
+## Sixth milestone: cross-system reconciliation
+
+A lost acknowledgement at a remote boundary leaves local state unable to distinguish
+"not committed" from "committed, acknowledgement lost." Blind replay can duplicate
+the side effect.
+
+The provider-evidence model now makes the retry boundary explicit:
+
+- matching authoritative readback suppresses retry and accepts the remote commit;
+- confirmed absence is retryable only with exact idempotency evidence bound to the
+  same operation and exact effect fingerprint;
+- ambiguous readback remains a hard stop even when an idempotency key is claimed;
+- conflicting provider, operation, payload, or idempotency evidence fails closed.
+
+The model does not contact a real service or claim exactly-once execution. See
+`docs/CROSS_SYSTEM_RECONCILIATION.md` for the bounded experiment and limitations.
+
 ## Run
 
 ```bash
@@ -89,4 +106,4 @@ PYTHONPATH=src pytest
 
 ## Roadmap
 
-Further milestones include cross-system reconciliation, richer failure injection, trace evaluation, and release metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
+Further milestones include richer failure injection, trace evaluation, and release metrics. Each milestone should add a reproducible failure case and tests before making a public claim.
