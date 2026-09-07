@@ -20,6 +20,9 @@ from .reconciliation import (
     ReconciliationDecision,
     RemoteStateAmbiguous,
     RetrySafetyUnknown,
+    StaleProviderReadback,
+    VersionedProviderState,
+    apply_conditional_retry,
     reconcile_lost_ack,
 )
 from .recovery import (
@@ -59,7 +62,10 @@ __all__ = [
     "RunState",
     "SimulationResult",
     "StaleCheckpoint",
+    "StaleProviderReadback",
     "TerminalStateConflict",
+    "VersionedProviderState",
+    "apply_conditional_retry",
     "reconcile_lost_ack",
     "replay",
     "replay_approval",

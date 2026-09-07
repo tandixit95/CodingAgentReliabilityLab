@@ -34,6 +34,10 @@ class RetrySafetyUnknown(RuntimeError):
     """Raised when absence is known but exact replay safety is not established."""
 
 
+class StaleProviderReadback(RuntimeError):
+    """Raised when a conditional retry no longer matches the provider revision read."""
+
+
 @dataclass(frozen=True, slots=True)
 class ExternalOperation:
     provider: str
@@ -71,8 +75,13 @@ class ProviderEvidence:
     readback: ProviderReadbackState
     observed_tool: str | None = None
     observed_payload: str | None = None
+    readback_revision: int | None = None
     idempotency_key: str | None = None
     idempotency_effect_sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.readback_revision is not None and self.readback_revision < 0:
+            raise ValueError("readback_revision must be nonnegative")
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +89,20 @@ class ReconciliationDecision:
     action: Literal["accept_remote_commit", "retry_exact_operation"]
     should_retry: bool
     reason: str
+    retry_precondition_revision: int | None = None
+    retry_effect_sha256: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class VersionedProviderState:
+    """Minimal provider state for an atomic compare-and-apply retry simulation."""
+
+    revision: int
+    effects: tuple[ExternalOperation, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.revision < 0:
+            raise ValueError("revision must be nonnegative")
 
 
 def reconcile_lost_ack(
@@ -133,8 +156,58 @@ def reconcile_lost_ack(
             "provider absence is known, but exact idempotent replay safety is not established"
         )
 
+    if evidence.readback_revision is None:
+        raise RetrySafetyUnknown(
+            "provider absence is known, but no revision is available to bind a conditional retry"
+        )
+
     return ReconciliationDecision(
         action="retry_exact_operation",
         should_retry=True,
-        reason="provider confirms absence and exact idempotency evidence permits same-operation replay",
+        reason=(
+            "provider confirms absence and exact idempotency evidence permits a retry only "
+            "while the observed provider revision is still current"
+        ),
+        retry_precondition_revision=evidence.readback_revision,
+        retry_effect_sha256=operation.effect_sha256,
+    )
+
+
+def apply_conditional_retry(
+    operation: ExternalOperation,
+    decision: ReconciliationDecision,
+    provider_state: VersionedProviderState,
+) -> VersionedProviderState:
+    """Atomically apply a retry only if the provider revision still matches readback.
+
+    This models a provider-side conditional write (for example, compare-and-set or
+    an If-Match-style contract). A local "freshness check" followed by an
+    unconditional write would retain the same time-of-check/time-of-use race and
+    is intentionally not modeled as safe.
+    """
+
+    expected_revision = decision.retry_precondition_revision
+    if not decision.should_retry or decision.action != "retry_exact_operation":
+        raise RetrySafetyUnknown("reconciliation decision does not authorize a retry")
+    if expected_revision is None:
+        raise RetrySafetyUnknown("retry decision is missing a provider revision precondition")
+    if decision.retry_effect_sha256 != operation.effect_sha256:
+        raise ReconciliationConflict("retry decision is not bound to the exact operation effect")
+    if provider_state.revision != expected_revision:
+        raise StaleProviderReadback(
+            "provider revision changed after the absence readback; retry must be reconciled again"
+        )
+
+    for existing in provider_state.effects:
+        if (
+            existing.provider == operation.provider
+            and existing.operation_id == operation.operation_id
+        ):
+            raise ReconciliationConflict(
+                "provider state contradicts the absence readback for this operation identity"
+            )
+
+    return VersionedProviderState(
+        revision=provider_state.revision + 1,
+        effects=provider_state.effects + (operation,),
     )

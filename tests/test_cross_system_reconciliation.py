@@ -20,6 +20,7 @@ def exact_absent_evidence(operation: ExternalOperation = OP) -> ProviderEvidence
         provider=operation.provider,
         operation_id=operation.operation_id,
         readback=ProviderReadbackState.ABSENT,
+        readback_revision=7,
         idempotency_key=operation.operation_id,
         idempotency_effect_sha256=operation.effect_sha256,
     )

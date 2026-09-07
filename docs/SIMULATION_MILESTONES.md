@@ -92,6 +92,22 @@ The provider-evidence model now makes the retry boundary explicit:
 The model does not contact a real service or claim exactly-once execution. See
 `docs/CROSS_SYSTEM_RECONCILIATION.md` for the bounded experiment and limitations.
 
+## Seventh milestone: stale provider readback race
+
+An authoritative `absent` readback can become stale before retry if another writer
+commits the operation in the gap. A merely recent read therefore cannot safely
+authorize an unconditional replay.
+
+The versioned-provider model adds an atomic retry boundary:
+
+- absent readback must carry a provider revision in addition to exact idempotency evidence;
+- retry authority carries that revision as a provider-side precondition;
+- an unchanged revision permits exactly one modeled retry and advances provider state;
+- a changed revision fails closed and requires reconciliation again;
+- contradictory same-revision state and missing revision evidence also fail closed.
+
+This models compare-and-set/ETag-style semantics, not a real provider API. See
+`docs/STALE_READBACK_RACE.md` for the executable race and limitations.
 ## Run
 
 ```bash
