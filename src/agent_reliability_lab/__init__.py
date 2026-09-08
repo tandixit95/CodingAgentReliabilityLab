@@ -12,6 +12,12 @@ from .approvals import (
 from .durable import DurableSandbox, LocalOperation
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
 from .events import Event, EventKind
+from .evidence_lineage import (
+    EvidenceLineageConflict,
+    ReconciliationEvidenceRecord,
+    ReconciliationEvidenceStore,
+    SupersededReconciliationDecision,
+)
 from .reconciliation import (
     ExternalOperation,
     ProviderEvidence,
@@ -48,6 +54,7 @@ __all__ = [
     "EffectRequest",
     "Event",
     "EventKind",
+    "EvidenceLineageConflict",
     "ExternalOperation",
     "IdempotencyConflict",
     "LocalOperation",
@@ -55,6 +62,8 @@ __all__ = [
     "ProviderReadbackState",
     "ReconciliationConflict",
     "ReconciliationDecision",
+    "ReconciliationEvidenceRecord",
+    "ReconciliationEvidenceStore",
     "RecoveryCheckpoint",
     "RecoveryOperation",
     "RemoteStateAmbiguous",
@@ -63,6 +72,7 @@ __all__ = [
     "SimulationResult",
     "StaleCheckpoint",
     "StaleProviderReadback",
+    "SupersededReconciliationDecision",
     "TerminalStateConflict",
     "VersionedProviderState",
     "apply_conditional_retry",
