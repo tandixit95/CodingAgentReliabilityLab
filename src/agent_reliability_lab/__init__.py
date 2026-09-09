@@ -14,6 +14,7 @@ from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, rep
 from .events import Event, EventKind
 from .evidence_lineage import (
     EvidenceLineageConflict,
+    ReconciliationCompletionRecord,
     ReconciliationEvidenceRecord,
     ReconciliationEvidenceStore,
     SupersededReconciliationDecision,
@@ -60,6 +61,7 @@ __all__ = [
     "LocalOperation",
     "ProviderEvidence",
     "ProviderReadbackState",
+    "ReconciliationCompletionRecord",
     "ReconciliationConflict",
     "ReconciliationDecision",
     "ReconciliationEvidenceRecord",

@@ -108,6 +108,21 @@ The versioned-provider model adds an atomic retry boundary:
 
 This models compare-and-set/ETag-style semantics, not a real provider API. See
 `docs/STALE_READBACK_RACE.md` for the executable race and limitations.
+
+## Eighth milestone: repeated lost-ack convergence
+
+A retry can satisfy the provider-side conditional write and still lose its acknowledgement. Restarting from the old local decision must not issue the same effect again.
+
+The reconciliation model now closes that loop explicitly:
+
+- a conditional retry can commit once while local completion remains unresolved;
+- replay before a fresh readback fails on the advanced provider revision;
+- a restarted runtime persists a newer PRESENT observation and supersedes the pre-crash retry authority;
+- only the current PRESENT decision can durably mark reconciliation complete;
+- an already reconciled operation cannot regain retry authority from a later absence observation.
+
+The provider side remains a deterministic versioned-state model and completion lineage remains local SQLite state. See `docs/REPEATED_LOST_ACK_LOOP.md` for the executable case and limitations.
+
 ## Run
 
 ```bash

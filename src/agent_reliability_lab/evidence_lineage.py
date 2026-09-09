@@ -36,6 +36,15 @@ class ReconciliationEvidenceRecord:
     decision: ReconciliationDecision
 
 
+@dataclass(frozen=True, slots=True)
+class ReconciliationCompletionRecord:
+    provider: str
+    operation_id: str
+    effect_sha256: str
+    evidence_id: str
+    revision: int
+
+
 class ReconciliationEvidenceStore:
     """Persist one monotonic provider-evidence head per exact external operation."""
 
@@ -50,6 +59,12 @@ class ReconciliationEvidenceStore:
                 "evidence_id TEXT NOT NULL, revision INTEGER NOT NULL, action TEXT NOT NULL, "
                 "should_retry INTEGER NOT NULL, reason TEXT NOT NULL, retry_precondition_revision INTEGER, "
                 "retry_effect_sha256 TEXT, PRIMARY KEY(provider, operation_id))"
+            )
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS reconciliation_completions ("
+                "provider TEXT NOT NULL, operation_id TEXT NOT NULL, effect_sha256 TEXT NOT NULL, "
+                "evidence_id TEXT NOT NULL, revision INTEGER NOT NULL, "
+                "PRIMARY KEY(provider, operation_id))"
             )
 
     @contextmanager
@@ -87,6 +102,16 @@ class ReconciliationEvidenceStore:
             decision=cls._decision_from_row(row),
         )
 
+    @staticmethod
+    def _completion_from_row(row: tuple) -> ReconciliationCompletionRecord:
+        return ReconciliationCompletionRecord(
+            provider=row[0],
+            operation_id=row[1],
+            effect_sha256=row[2],
+            evidence_id=row[3],
+            revision=row[4],
+        )
+
     def record(
         self, operation: ExternalOperation, evidence_id: str, evidence: ProviderEvidence
     ) -> ReconciliationEvidenceRecord:
@@ -106,6 +131,22 @@ class ReconciliationEvidenceStore:
             decision,
         )
         with self._transaction() as conn:
+            completion_row = conn.execute(
+                "SELECT provider, operation_id, effect_sha256, evidence_id, revision "
+                "FROM reconciliation_completions WHERE provider=? AND operation_id=?",
+                (operation.provider, operation.operation_id),
+            ).fetchone()
+            if completion_row is not None:
+                completion = self._completion_from_row(completion_row)
+                if completion.effect_sha256 != operation.effect_sha256:
+                    raise EvidenceLineageConflict(
+                        "reconciled operation identity is bound to a different exact effect"
+                    )
+                if candidate.decision.should_retry:
+                    raise SupersededReconciliationDecision(
+                        "reconciled operation cannot regain retry authority from later absence evidence"
+                    )
+
             row = conn.execute(
                 "SELECT provider, operation_id, effect_sha256, evidence_id, revision, action, "
                 "should_retry, reason, retry_precondition_revision, retry_effect_sha256 "
@@ -166,6 +207,84 @@ class ReconciliationEvidenceStore:
         if record.effect_sha256 != operation.effect_sha256:
             raise EvidenceLineageConflict("persisted evidence is bound to a different exact effect")
         return record
+
+    def completion(self, operation: ExternalOperation) -> ReconciliationCompletionRecord | None:
+        with self._transaction() as conn:
+            row = conn.execute(
+                "SELECT provider, operation_id, effect_sha256, evidence_id, revision "
+                "FROM reconciliation_completions WHERE provider=? AND operation_id=?",
+                (operation.provider, operation.operation_id),
+            ).fetchone()
+        if row is None:
+            return None
+        completion = self._completion_from_row(row)
+        if completion.effect_sha256 != operation.effect_sha256:
+            raise EvidenceLineageConflict(
+                "persisted reconciliation completion is bound to a different exact effect"
+            )
+        return completion
+
+    def mark_reconciled(
+        self, operation: ExternalOperation, evidence_id: str, decision: ReconciliationDecision
+    ) -> ReconciliationCompletionRecord:
+        """Durably complete reconciliation only from the current PRESENT decision."""
+
+        with self._transaction() as conn:
+            row = conn.execute(
+                "SELECT provider, operation_id, effect_sha256, evidence_id, revision, action, "
+                "should_retry, reason, retry_precondition_revision, retry_effect_sha256 "
+                "FROM reconciliation_heads WHERE provider=? AND operation_id=?",
+                (operation.provider, operation.operation_id),
+            ).fetchone()
+            if row is None:
+                raise EvidenceLineageConflict(
+                    "no reconciliation evidence is persisted for this operation"
+                )
+            current = self._record_from_row(row)
+            if current.effect_sha256 != operation.effect_sha256:
+                raise EvidenceLineageConflict(
+                    "persisted evidence is bound to a different exact effect"
+                )
+            if current.evidence_id != evidence_id or current.decision != decision:
+                raise SupersededReconciliationDecision(
+                    "reconciliation decision is superseded by newer persisted provider evidence"
+                )
+            if decision.should_retry or decision.action != "accept_remote_commit":
+                raise EvidenceLineageConflict(
+                    "only a current provider-PRESENT decision can complete reconciliation"
+                )
+
+            existing_row = conn.execute(
+                "SELECT provider, operation_id, effect_sha256, evidence_id, revision "
+                "FROM reconciliation_completions WHERE provider=? AND operation_id=?",
+                (operation.provider, operation.operation_id),
+            ).fetchone()
+            if existing_row is not None:
+                existing = self._completion_from_row(existing_row)
+                if existing.effect_sha256 != operation.effect_sha256:
+                    raise EvidenceLineageConflict(
+                        "reconciled operation identity is bound to a different exact effect"
+                    )
+                return existing
+
+            completion = ReconciliationCompletionRecord(
+                provider=operation.provider,
+                operation_id=operation.operation_id,
+                effect_sha256=operation.effect_sha256,
+                evidence_id=evidence_id,
+                revision=current.revision,
+            )
+            conn.execute(
+                "INSERT INTO reconciliation_completions VALUES (?, ?, ?, ?, ?)",
+                (
+                    completion.provider,
+                    completion.operation_id,
+                    completion.effect_sha256,
+                    completion.evidence_id,
+                    completion.revision,
+                ),
+            )
+            return completion
 
     def assert_current(
         self, operation: ExternalOperation, evidence_id: str, decision: ReconciliationDecision
