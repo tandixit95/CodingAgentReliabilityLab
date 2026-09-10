@@ -11,8 +11,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 from typing import Literal
 
 
@@ -211,3 +215,115 @@ def apply_conditional_retry(
         revision=provider_state.revision + 1,
         effects=provider_state.effects + (operation,),
     )
+
+
+class VersionedProviderStore:
+    """SQLite-backed provider model with an atomic revision-conditional write."""
+
+    def __init__(self, database: str | Path) -> None:
+        self.database = str(database)
+        if self.database == ":memory:":
+            raise ValueError("a file-backed database is required for competing-worker tests")
+        with self._transaction() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS provider_revisions ("
+                "provider TEXT PRIMARY KEY NOT NULL, revision INTEGER NOT NULL"
+                " CHECK (revision >= 0))"
+            )
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS provider_effects ("
+                "provider TEXT NOT NULL, operation_id TEXT NOT NULL, tool TEXT NOT NULL, "
+                "payload TEXT NOT NULL, PRIMARY KEY(provider, operation_id))"
+            )
+
+    @contextmanager
+    def _transaction(self) -> Iterator[sqlite3.Connection]:
+        conn = sqlite3.connect(self.database, timeout=15, isolation_level=None)
+        try:
+            conn.execute("PRAGMA synchronous=FULL")
+            conn.execute("BEGIN IMMEDIATE")
+            yield conn
+            conn.commit()
+        except BaseException:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+    @staticmethod
+    def _snapshot_in_transaction(conn: sqlite3.Connection, provider: str) -> VersionedProviderState:
+        row = conn.execute(
+            "SELECT revision FROM provider_revisions WHERE provider=?", (provider,)
+        ).fetchone()
+        if row is None:
+            conn.execute(
+                "INSERT INTO provider_revisions(provider, revision) VALUES (?, 0)", (provider,)
+            )
+            revision = 0
+        else:
+            revision = row[0]
+        effects = tuple(
+            ExternalOperation(provider, operation_id, tool, payload)
+            for operation_id, tool, payload in conn.execute(
+                "SELECT operation_id, tool, payload FROM provider_effects "
+                "WHERE provider=? ORDER BY operation_id",
+                (provider,),
+            )
+        )
+        return VersionedProviderState(revision=revision, effects=effects)
+
+    def snapshot(self, provider: str) -> VersionedProviderState:
+        if not isinstance(provider, str) or not provider.strip():
+            raise ValueError("provider must be a nonempty string")
+        with self._transaction() as conn:
+            return self._snapshot_in_transaction(conn, provider)
+
+    def read(self, operation: ExternalOperation) -> ProviderEvidence:
+        """Return a versioned exact readback under this modeled provider contract."""
+
+        with self._transaction() as conn:
+            state = self._snapshot_in_transaction(conn, operation.provider)
+            row = conn.execute(
+                "SELECT tool, payload FROM provider_effects WHERE provider=? AND operation_id=?",
+                (operation.provider, operation.operation_id),
+            ).fetchone()
+        if row is None:
+            return ProviderEvidence(
+                provider=operation.provider,
+                operation_id=operation.operation_id,
+                readback=ProviderReadbackState.ABSENT,
+                readback_revision=state.revision,
+                idempotency_key=operation.operation_id,
+                idempotency_effect_sha256=operation.effect_sha256,
+            )
+        if row != (operation.tool, operation.payload):
+            raise ReconciliationConflict(
+                "provider stores a conflicting effect for this operation identity"
+            )
+        return ProviderEvidence(
+            provider=operation.provider,
+            operation_id=operation.operation_id,
+            readback=ProviderReadbackState.PRESENT,
+            observed_tool=row[0],
+            observed_payload=row[1],
+            readback_revision=state.revision,
+        )
+
+    def conditional_apply(
+        self, operation: ExternalOperation, decision: ReconciliationDecision
+    ) -> VersionedProviderState:
+        """Serialize competing conditional retries at the provider revision boundary."""
+
+        with self._transaction() as conn:
+            current = self._snapshot_in_transaction(conn, operation.provider)
+            updated = apply_conditional_retry(operation, decision, current)
+            conn.execute(
+                "INSERT INTO provider_effects(provider, operation_id, tool, payload) "
+                "VALUES (?, ?, ?, ?)",
+                (operation.provider, operation.operation_id, operation.tool, operation.payload),
+            )
+            conn.execute(
+                "UPDATE provider_revisions SET revision=? WHERE provider=?",
+                (updated.revision, operation.provider),
+            )
+            return updated

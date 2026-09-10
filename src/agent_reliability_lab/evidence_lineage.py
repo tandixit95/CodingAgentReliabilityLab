@@ -164,7 +164,10 @@ class ReconciliationEvidenceStore:
                         "provider evidence is older than the persisted reconciliation head"
                     )
                 if candidate.revision == current.revision:
-                    if candidate == current:
+                    if (
+                        candidate.effect_sha256 == current.effect_sha256
+                        and candidate.decision == current.decision
+                    ):
                         return current
                     raise EvidenceLineageConflict(
                         "the same provider revision cannot carry conflicting reconciliation evidence"

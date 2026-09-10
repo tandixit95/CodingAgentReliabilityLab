@@ -12,6 +12,7 @@ interruptions without silently authorizing a different operation.
 [stale-readback race](docs/STALE_READBACK_RACE.md) ·
 [evidence-lineage restart](docs/RECONCILIATION_EVIDENCE_LINEAGE.md) ·
 [repeated lost-ack loop](docs/REPEATED_LOST_ACK_LOOP.md) ·
+[competing reconcilers](docs/COMPETING_RECONCILERS.md) ·
 [simulation milestones](docs/SIMULATION_MILESTONES.md) · [tests](tests)
 
 ## What is implemented
@@ -28,6 +29,7 @@ interruptions without silently authorizing a different operation.
 | Stale-readback race | Revision-bound conditional retry prevents time-of-check/time-of-use replay | Deterministic versioned-provider model |
 | Reconciliation evidence lineage | Newer provider evidence supersedes old retry authority across restart | SQLite-backed deterministic evidence store |
 | Repeated lost-ack loop | Retry commit + lost acknowledgement converges after fresh PRESENT readback without duplicate replay | Deterministic provider state + SQLite reconciliation completion |
+| Competing reconcilers | Two restarted workers race one revision-bound retry; one commits and the stale worker re-reads PRESENT | Separate SQLite provider + reconciliation stores, two child processes |
 
 The naive split-transaction baseline duplicates the local effect after a crash.
 The transactional version either rolls back the uncommitted effect or recognizes
@@ -82,7 +84,7 @@ remote idempotency/reconciliation contract; this lab does not supply one.
 
 There is no production authentication service, distributed consensus, real model
 evaluation, external adoption claim, or benchmark of production throughput.
-Checkpoint lineage, cross-system reconciliation, a revision-bound stale-readback race, persistent reconciliation-evidence lineage, and repeated lost-ack convergence are implemented as bounded deterministic models; no real provider integration is claimed.
+Checkpoint lineage, cross-system reconciliation, a revision-bound stale-readback race, persistent reconciliation-evidence lineage, repeated lost-ack convergence, and a competing-reconciler race are implemented as bounded deterministic models; no real provider integration is claimed.
 
 This is an AI-assisted independent engineering project. Implementation and tests
 are inspectable; automated validation is not represented as independent human

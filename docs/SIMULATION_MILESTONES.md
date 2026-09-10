@@ -123,6 +123,21 @@ The reconciliation model now closes that loop explicitly:
 
 The provider side remains a deterministic versioned-state model and completion lineage remains local SQLite state. See `docs/REPEATED_LOST_ACK_LOOP.md` for the executable case and limitations.
 
+## Ninth milestone: competing reconcilers
+
+Two restarted workers can load the same retry authority before either observes the other's provider commit. A local freshness check is insufficient because both workers can pass it.
+
+The provider-race model adds an independently persisted conditional-write boundary:
+
+- two real child processes load the same durable retry decision before a start barrier;
+- a separate SQLite provider store serializes revision-conditional writes;
+- exactly one worker advances the provider revision and records the exact effect;
+- the losing worker fails stale, re-reads the provider as PRESENT, and converges instead of retrying again;
+- equivalent same-revision provider observations from independent workers converge to one evidence head and one durable completion.
+
+This is a single-host provider simulation, not a distributed consensus or exactly-once claim. See `docs/COMPETING_RECONCILERS.md` for the executable race and limitations.
+
+
 ## Run
 
 ```bash

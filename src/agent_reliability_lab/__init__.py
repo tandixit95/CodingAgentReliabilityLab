@@ -29,6 +29,7 @@ from .reconciliation import (
     RetrySafetyUnknown,
     StaleProviderReadback,
     VersionedProviderState,
+    VersionedProviderStore,
     apply_conditional_retry,
     reconcile_lost_ack,
 )
@@ -77,6 +78,7 @@ __all__ = [
     "SupersededReconciliationDecision",
     "TerminalStateConflict",
     "VersionedProviderState",
+    "VersionedProviderStore",
     "apply_conditional_retry",
     "reconcile_lost_ack",
     "replay",
