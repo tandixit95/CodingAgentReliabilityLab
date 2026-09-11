@@ -11,6 +11,7 @@ from .approvals import (
 )
 from .durable import DurableSandbox, LocalOperation
 from .effects import EffectReplayResult, EffectRequest, IdempotencyConflict, replay_effects
+from .evaluation import SCENARIO_RUNNERS, ScenarioResult, run_scenario_manifest, summarize_results
 from .events import Event, EventKind
 from .evidence_lineage import (
     EvidenceLineageConflict,
@@ -43,6 +44,7 @@ from .recovery import (
 from .simulator import RunState, SimulationResult, TerminalStateConflict, replay
 
 __all__ = [
+    "SCENARIO_RUNNERS",
     "ApprovalAction",
     "ApprovalConflict",
     "ApprovalDenied",
@@ -72,6 +74,7 @@ __all__ = [
     "RemoteStateAmbiguous",
     "RetrySafetyUnknown",
     "RunState",
+    "ScenarioResult",
     "SimulationResult",
     "StaleCheckpoint",
     "StaleProviderReadback",
@@ -84,4 +87,6 @@ __all__ = [
     "replay",
     "replay_approval",
     "replay_effects",
+    "run_scenario_manifest",
+    "summarize_results",
 ]

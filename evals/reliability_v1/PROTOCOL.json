@@ -1,0 +1,51 @@
+{
+  "claim_boundary": {
+    "aggregate_score_claim_allowed_before_two_reproducing_runs": false,
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "model_quality_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "throughput_or_latency_claim_allowed": false
+  },
+  "execution": {
+    "aggregate_publication_requires_frozen_protocol_commit": true,
+    "independent_runs_required": 2,
+    "normalized_output_byte_equal_required": true,
+    "result_path_pattern": "evals/reliability_v1/artifacts/run-{run}.json"
+  },
+  "metrics": {
+    "convergence_pass_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    },
+    "duplicate_effect_violations": {
+      "operator": "eq",
+      "threshold": 0
+    },
+    "fail_closed_pass_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    },
+    "safety_pass_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    },
+    "scenario_pass_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    }
+  },
+  "protocol_id": "core-reliability-v1-20260911",
+  "purpose": "aggregate deterministic safety, convergence, and fail-closed evidence across implemented coding-agent reliability boundaries",
+  "result_artifact": {
+    "must_be_absent_at_freeze": true,
+    "published_results_path": "evals/reliability_v1/RESULTS.json"
+  },
+  "scenario_manifest": {
+    "path": "evals/reliability_v1/SCENARIOS.json",
+    "scenario_count": 11,
+    "sha256": "5ca2ab5cd388037d056420e678004dd9909e479c11b84fbd6424b7a7d06c9044"
+  },
+  "schema_version": "carl.reliability-evaluation-protocol.v1",
+  "status": "frozen_unexecuted"
+}

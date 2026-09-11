@@ -138,6 +138,18 @@ The provider-race model adds an independently persisted conditional-write bounda
 This is a single-host provider simulation, not a distributed consensus or exactly-once claim. See `docs/COMPETING_RECONCILERS.md` for the executable race and limitations.
 
 
+## Tenth milestone: frozen reliability evaluation protocol
+
+The repository now has enough independent failure-mode evidence that another narrow retry variant would add less value than a fixed cross-milestone evaluation surface. The first aggregate protocol therefore freezes **before outcomes**:
+
+- `evals/reliability_v1/SCENARIOS.json` selects 11 representative executable scenarios from the implemented boundaries;
+- `PROTOCOL.json` fixes safety, convergence, fail-closed, and duplicate-effect gates before aggregate execution;
+- two independent normalized runs must be byte-identical before an aggregate result can be published;
+- `RESULTS.json` is intentionally absent at this milestone, and the verifier fails if it already exists at the freeze boundary.
+
+The harness is executable, but no aggregate score is claimed by the freeze commit. A later run must verify the remote frozen commit first, execute the unchanged suite twice, and apply the predeclared gates. Even then, the result remains a deterministic local-system evaluation rather than production or exactly-once evidence.
+
+
 ## Run
 
 ```bash

@@ -1,0 +1,94 @@
+{
+  "fixture_set": "core-reliability-boundaries-20260911",
+  "scenarios": [
+    {
+      "category": "event_identity",
+      "convergence_required": true,
+      "fail_closed_required": false,
+      "id": "stale_child_completion_scoped",
+      "runner": "stale_child_completion_scoped",
+      "safety_required": true
+    },
+    {
+      "category": "retry_idempotency",
+      "convergence_required": true,
+      "fail_closed_required": false,
+      "id": "lost_ack_retry_idempotency",
+      "runner": "lost_ack_retry_idempotency",
+      "safety_required": true
+    },
+    {
+      "category": "terminal_finality",
+      "convergence_required": false,
+      "fail_closed_required": true,
+      "id": "terminal_conflict_fails_closed",
+      "runner": "terminal_conflict_fails_closed",
+      "safety_required": true
+    },
+    {
+      "category": "approval_binding",
+      "convergence_required": false,
+      "fail_closed_required": true,
+      "id": "approval_mutation_fails_closed",
+      "runner": "approval_mutation_fails_closed",
+      "safety_required": true
+    },
+    {
+      "category": "durable_execution",
+      "convergence_required": true,
+      "fail_closed_required": false,
+      "id": "durable_restart_exact_replay",
+      "runner": "durable_restart_exact_replay",
+      "safety_required": true
+    },
+    {
+      "category": "partial_progress_recovery",
+      "convergence_required": true,
+      "fail_closed_required": true,
+      "id": "stale_checkpoint_lineage_fails_closed",
+      "runner": "stale_checkpoint_lineage_fails_closed",
+      "safety_required": true
+    },
+    {
+      "category": "cross_system_reconciliation",
+      "convergence_required": true,
+      "fail_closed_required": false,
+      "id": "provider_present_suppresses_retry",
+      "runner": "provider_present_suppresses_retry",
+      "safety_required": true
+    },
+    {
+      "category": "stale_readback_race",
+      "convergence_required": false,
+      "fail_closed_required": true,
+      "id": "stale_readback_revision_fails_closed",
+      "runner": "stale_readback_revision_fails_closed",
+      "safety_required": true
+    },
+    {
+      "category": "evidence_lineage",
+      "convergence_required": true,
+      "fail_closed_required": true,
+      "id": "restart_evidence_supersedes_retry",
+      "runner": "restart_evidence_supersedes_retry",
+      "safety_required": true
+    },
+    {
+      "category": "repeated_lost_ack",
+      "convergence_required": true,
+      "fail_closed_required": true,
+      "id": "repeated_lost_ack_converges",
+      "runner": "repeated_lost_ack_converges",
+      "safety_required": true
+    },
+    {
+      "category": "competing_reconcilers",
+      "convergence_required": true,
+      "fail_closed_required": true,
+      "id": "competing_retry_authorities_converge",
+      "runner": "competing_retry_authorities_converge",
+      "safety_required": true
+    }
+  ],
+  "schema_version": "carl.reliability-scenarios.v1"
+}
