@@ -1,0 +1,219 @@
+{
+  "aggregate_disposition": "pass",
+  "claim_boundary": {
+    "aggregate_score_claim_allowed_before_two_reproducing_runs": false,
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "model_quality_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "throughput_or_latency_claim_allowed": false
+  },
+  "freeze_commit_sha": "f11c5d441261fbbd07be23b806c53d7c685d8560",
+  "frozen_gates": {
+    "convergence_pass_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    },
+    "duplicate_effect_violations": {
+      "actual": 0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 0
+    },
+    "fail_closed_pass_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    },
+    "safety_pass_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    },
+    "scenario_pass_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    }
+  },
+  "limitations": [
+    "Deterministic local reliability scenarios only; not a production reliability measurement.",
+    "No exactly-once remote-effect, distributed-consensus, model-quality, throughput, or latency claim.",
+    "Provider and persistence boundaries are bounded in-memory or SQLite-backed simulations."
+  ],
+  "metrics": {
+    "all_scenarios_passed": true,
+    "convergence_applicable": 8,
+    "convergence_pass_rate": 1.0,
+    "convergence_passed": 8,
+    "duplicate_effect_violations": 0,
+    "fail_closed_applicable": 7,
+    "fail_closed_pass_rate": 1.0,
+    "fail_closed_passed": 7,
+    "safety_applicable": 11,
+    "safety_pass_rate": 1.0,
+    "safety_passed": 11,
+    "scenario_count": 11,
+    "scenario_pass_rate": 1.0,
+    "scenario_passed": 11
+  },
+  "protocol_id": "core-reliability-v1-20260911",
+  "protocol_sha256": "bba37a4f3f5733bd51af35eae1286090dcd36929fbaf711a28ffccc0735819df",
+  "reproduction": {
+    "independent_runs_recorded": 2,
+    "independent_runs_required": 2,
+    "normalized_output_byte_identical": true,
+    "normalized_output_sha256": "31390b50cb0761a1c4c06f3c5783367f52fb9d4c15722f409bb5efcc1a24c203"
+  },
+  "run_artifacts": [
+    {
+      "path": "evals/reliability_v1/artifacts/run-1.json",
+      "sha256": "31390b50cb0761a1c4c06f3c5783367f52fb9d4c15722f409bb5efcc1a24c203"
+    },
+    {
+      "path": "evals/reliability_v1/artifacts/run-2.json",
+      "sha256": "31390b50cb0761a1c4c06f3c5783367f52fb9d4c15722f409bb5efcc1a24c203"
+    }
+  ],
+  "scenario_manifest_sha256": "5ca2ab5cd388037d056420e678004dd9909e479c11b84fbd6424b7a7d06c9044",
+  "scenario_results": [
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "foreign child completion is ignored and the parent reaches its own terminal state",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": false,
+      "fail_closed_passed": null,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "stale_child_completion_scoped"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "exact replay is suppressed by the stable operation identity",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": false,
+      "fail_closed_passed": null,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "lost_ack_retry_idempotency"
+    },
+    {
+      "convergence_applicable": false,
+      "convergence_passed": null,
+      "detail": "incompatible same-turn terminal outcomes are rejected instead of last-write-wins",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "terminal_conflict_fails_closed"
+    },
+    {
+      "convergence_applicable": false,
+      "convergence_passed": null,
+      "detail": "approval is bound to the exact operation, tool, and payload",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "approval_mutation_fails_closed"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "file-backed completion survives restart and exact replay does not repeat the local effect",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": false,
+      "fail_closed_passed": null,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "durable_restart_exact_replay"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "stale checkpoint replay is rejected and recovery resumes only from the current lineage",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "stale_checkpoint_lineage_fails_closed"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "authoritative PRESENT readback accepts the committed effect instead of replaying it",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": false,
+      "fail_closed_passed": null,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "provider_present_suppresses_retry"
+    },
+    {
+      "convergence_applicable": false,
+      "convergence_passed": null,
+      "detail": "revision drift invalidates old absence evidence before a retry can commit",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "stale_readback_revision_fails_closed"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "newer provider evidence durably supersedes pre-restart retry authority",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "restart_evidence_supersedes_retry"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "fresh PRESENT evidence closes a lost-ack loop and supersedes stale retry authority",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "repeated_lost_ack_converges"
+    },
+    {
+      "convergence_applicable": true,
+      "convergence_passed": true,
+      "detail": "one revision-bound retry commits and stale competing authority is rejected before convergence",
+      "duplicate_effect_violations": 0,
+      "fail_closed_applicable": true,
+      "fail_closed_passed": true,
+      "passed": true,
+      "safety_applicable": true,
+      "safety_passed": true,
+      "scenario_id": "competing_retry_authorities_converge"
+    }
+  ],
+  "schema_version": "carl.reliability-evaluation-publication.v1"
+}

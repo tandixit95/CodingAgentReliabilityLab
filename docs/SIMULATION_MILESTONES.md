@@ -149,6 +149,10 @@ The repository now has enough independent failure-mode evidence that another nar
 
 The harness is executable, but no aggregate score is claimed by the freeze commit. A later run must verify the remote frozen commit first, execute the unchanged suite twice, and apply the predeclared gates. Even then, the result remains a deterministic local-system evaluation rather than production or exactly-once evidence.
 
+### Later execution result
+
+The later execution boundary reverified remote freeze commit `f11c5d441261fbbd07be23b806c53d7c685d8560`, preserved `PROTOCOL.json` and `SCENARIOS.json` byte-for-byte, and executed the exact manifest in two independent Python processes. Both normalized outputs have SHA-256 `31390b50cb0761a1c4c06f3c5783367f52fb9d4c15722f409bb5efcc1a24c203`. All predeclared gates pass: scenario 11/11, safety 11/11, convergence 8/8, fail-closed 7/7, duplicate-effect violations 0. `evals/reliability_v1/RESULTS.json` records the result and `verify_results.py` re-derives the disposition from the frozen thresholds. The claim boundary remains unchanged.
+
 
 ## Run
 
