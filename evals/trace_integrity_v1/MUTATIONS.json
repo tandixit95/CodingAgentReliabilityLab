@@ -1,0 +1,126 @@
+{
+  "corpus_id": "trace-integrity-mutations-20260913",
+  "mutations": [
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "event_identity",
+      "id": "event_run_scope_graft",
+      "operator": "replace",
+      "path": "/records/0/run_id",
+      "value": "run-foreign"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "event_identity",
+      "id": "event_turn_scope_graft",
+      "operator": "replace",
+      "path": "/records/0/turn_id",
+      "value": "turn-child"
+    },
+    {
+      "base_trace_id": "parent_turn_terminal",
+      "category": "event_identity",
+      "id": "event_id_collision",
+      "operator": "replace",
+      "path": "/records/1/event_id",
+      "value": "evt-output"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "trace_order",
+      "id": "record_sequence_collision",
+      "operator": "replace",
+      "path": "/records/1/sequence",
+      "value": 1
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "approval_effect_binding",
+      "id": "approval_operation_swap",
+      "operator": "replace",
+      "path": "/records/1/operation_id",
+      "value": "op-foreign"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "approval_effect_binding",
+      "id": "effect_payload_hash_drift",
+      "operator": "replace",
+      "path": "/records/4/payload_sha256",
+      "value": "7ba2bf965b72bbb3448c386c6eab9ff21f2b28ce61b27ba77d39fb7baddce032"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "approval_effect_binding",
+      "id": "effect_fingerprint_drift",
+      "operator": "replace",
+      "path": "/records/4/effect_sha256",
+      "value": "cab184c4ca3b729edf76f060cf4aacaa5747376a0727193d787d1e6e3c8bb6af"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "checkpoint_lineage",
+      "id": "checkpoint_parent_rewind",
+      "operator": "replace",
+      "path": "/records/5/parent_checkpoint_id",
+      "value": "cp-foreign"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "checkpoint_lineage",
+      "id": "checkpoint_sequence_gap",
+      "operator": "replace",
+      "path": "/records/5/checkpoint_sequence",
+      "value": 2
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "checkpoint_lineage",
+      "id": "checkpoint_plan_hash_drift",
+      "operator": "replace",
+      "path": "/records/5/plan_sha256",
+      "value": "e4eaa2228c8c29e03d6a964b49fed291fe1779a3846f48761b9af0a67c61bd4b"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "provider_revision",
+      "id": "provider_revision_rollback",
+      "operator": "replace",
+      "path": "/records/6/revision",
+      "value": 2
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "provider_revision",
+      "id": "provider_same_revision_conflict",
+      "operator": "replace",
+      "path": "/records/6/revision",
+      "value": 3
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "reconciliation_completion",
+      "id": "completion_stale_evidence",
+      "operator": "replace",
+      "path": "/records/7/evidence_id",
+      "value": "ev-3-absent"
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "reconciliation_completion",
+      "id": "completion_revision_drift",
+      "operator": "replace",
+      "path": "/records/7/revision",
+      "value": 3
+    },
+    {
+      "base_trace_id": "retry_then_reconcile",
+      "category": "reconciliation_completion",
+      "id": "completion_effect_drift",
+      "operator": "replace",
+      "path": "/records/7/effect_sha256",
+      "value": "9167cd41d46396a062532b9724cbf7cac63ae431798ef943c59396f345d2ac83"
+    }
+  ],
+  "schema_version": "carl.trace-integrity-mutations.v1"
+}

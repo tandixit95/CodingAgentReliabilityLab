@@ -1,0 +1,83 @@
+{
+  "common_record_required": [
+    "record_id",
+    "sequence",
+    "kind"
+  ],
+  "cross_record_invariants": [
+    "record sequence is unique and strictly increasing in serialized order",
+    "runtime event run/turn identity matches trace scope and event_id is unique",
+    "approval and effect bind the same exact operation/tool/payload fingerprint",
+    "effect execution requires a prior approval and cannot follow denial",
+    "checkpoint lineage is linear with stable plan identity and nondecreasing progress",
+    "provider revisions are monotonic and same-revision observations cannot conflict",
+    "reconciliation completion binds the latest matching PRESENT provider evidence"
+  ],
+  "record_kinds": {
+    "approval": {
+      "required": [
+        "provider",
+        "operation_id",
+        "tool",
+        "payload_sha256",
+        "effect_sha256",
+        "decision"
+      ]
+    },
+    "checkpoint": {
+      "required": [
+        "run_id",
+        "checkpoint_id",
+        "parent_checkpoint_id",
+        "checkpoint_sequence",
+        "plan_sha256",
+        "completed_count"
+      ]
+    },
+    "effect": {
+      "required": [
+        "provider",
+        "operation_id",
+        "tool",
+        "payload_sha256",
+        "effect_sha256",
+        "idempotency_key"
+      ]
+    },
+    "provider_evidence": {
+      "required": [
+        "provider",
+        "operation_id",
+        "evidence_id",
+        "revision",
+        "readback",
+        "effect_sha256"
+      ]
+    },
+    "reconciliation_completion": {
+      "required": [
+        "provider",
+        "operation_id",
+        "evidence_id",
+        "revision",
+        "effect_sha256"
+      ]
+    },
+    "runtime_event": {
+      "required": [
+        "event_id",
+        "run_id",
+        "turn_id",
+        "event_kind",
+        "payload_sha256"
+      ]
+    }
+  },
+  "schema_version": "carl.trace-integrity-schema.v1",
+  "scope_required": [
+    "run_id",
+    "turn_id",
+    "provider",
+    "operation_id"
+  ]
+}

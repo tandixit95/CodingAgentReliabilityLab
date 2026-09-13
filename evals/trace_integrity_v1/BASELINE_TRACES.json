@@ -1,0 +1,188 @@
+{
+  "fixture_set": "trace-integrity-clean-baselines-20260913",
+  "schema_version": "carl.trace-integrity-baselines.v1",
+  "traces": [
+    {
+      "records": [
+        {
+          "event_id": "evt-1",
+          "event_kind": "output",
+          "kind": "runtime_event",
+          "payload_sha256": "905339de841bb714ad2ef2f43461fd873ea03314fbf0a4c66dacb83ad5474695",
+          "record_id": "r1",
+          "run_id": "run-42",
+          "sequence": 1,
+          "turn_id": "turn-parent"
+        },
+        {
+          "decision": "approved",
+          "effect_sha256": "542ac8fcb37fc7a1db16ecfbc828e09a9406098ca1bbc6809be9fab1d7e0750b",
+          "kind": "approval",
+          "operation_id": "op-17",
+          "payload_sha256": "da14ec0f97a1e27cf44749922542bf2f8eebcada6344559da98b2e670fc9588d",
+          "provider": "local-provider",
+          "record_id": "r2",
+          "sequence": 2,
+          "tool": "record_note"
+        },
+        {
+          "checkpoint_id": "cp-0",
+          "checkpoint_sequence": 0,
+          "completed_count": 0,
+          "kind": "checkpoint",
+          "parent_checkpoint_id": null,
+          "plan_sha256": "bfead2da28a43e84e167682b3b4fb7d484f89c694c2c3e944af992e646ccfeed",
+          "record_id": "r3",
+          "run_id": "run-42",
+          "sequence": 3
+        },
+        {
+          "effect_sha256": "542ac8fcb37fc7a1db16ecfbc828e09a9406098ca1bbc6809be9fab1d7e0750b",
+          "evidence_id": "ev-3-absent",
+          "kind": "provider_evidence",
+          "operation_id": "op-17",
+          "provider": "local-provider",
+          "readback": "absent",
+          "record_id": "r4",
+          "revision": 3,
+          "sequence": 4
+        },
+        {
+          "effect_sha256": "542ac8fcb37fc7a1db16ecfbc828e09a9406098ca1bbc6809be9fab1d7e0750b",
+          "idempotency_key": "idem-op-17",
+          "kind": "effect",
+          "operation_id": "op-17",
+          "payload_sha256": "da14ec0f97a1e27cf44749922542bf2f8eebcada6344559da98b2e670fc9588d",
+          "provider": "local-provider",
+          "record_id": "r5",
+          "sequence": 5,
+          "tool": "record_note"
+        },
+        {
+          "checkpoint_id": "cp-1",
+          "checkpoint_sequence": 1,
+          "completed_count": 1,
+          "kind": "checkpoint",
+          "parent_checkpoint_id": "cp-0",
+          "plan_sha256": "bfead2da28a43e84e167682b3b4fb7d484f89c694c2c3e944af992e646ccfeed",
+          "record_id": "r6",
+          "run_id": "run-42",
+          "sequence": 6
+        },
+        {
+          "effect_sha256": "542ac8fcb37fc7a1db16ecfbc828e09a9406098ca1bbc6809be9fab1d7e0750b",
+          "evidence_id": "ev-4-present",
+          "kind": "provider_evidence",
+          "operation_id": "op-17",
+          "provider": "local-provider",
+          "readback": "present",
+          "record_id": "r7",
+          "revision": 4,
+          "sequence": 7
+        },
+        {
+          "effect_sha256": "542ac8fcb37fc7a1db16ecfbc828e09a9406098ca1bbc6809be9fab1d7e0750b",
+          "evidence_id": "ev-4-present",
+          "kind": "reconciliation_completion",
+          "operation_id": "op-17",
+          "provider": "local-provider",
+          "record_id": "r8",
+          "revision": 4,
+          "sequence": 8
+        }
+      ],
+      "scope": {
+        "operation_id": "op-17",
+        "provider": "local-provider",
+        "run_id": "run-42",
+        "turn_id": "turn-parent"
+      },
+      "trace_id": "retry_then_reconcile"
+    },
+    {
+      "records": [
+        {
+          "event_id": "evt-pending",
+          "event_kind": "output",
+          "kind": "runtime_event",
+          "payload_sha256": "6c99eafb6a8e8007863f35fdc807f9fc2be9aabf35a6344eb87f55428021ae2e",
+          "record_id": "p1",
+          "run_id": "run-84",
+          "sequence": 1,
+          "turn_id": "turn-parent"
+        },
+        {
+          "decision": "approved",
+          "effect_sha256": "066f3c30f147e480acb5198e97f453be77c359f351d16512c51347d20e88a6c0",
+          "kind": "approval",
+          "operation_id": "op-22",
+          "payload_sha256": "41c691092945085c0570557d8b55db737c56953f5e086d19c9968375afcf0008",
+          "provider": "provider-b",
+          "record_id": "p2",
+          "sequence": 2,
+          "tool": "write_marker"
+        },
+        {
+          "checkpoint_id": "cp-pending",
+          "checkpoint_sequence": 0,
+          "completed_count": 0,
+          "kind": "checkpoint",
+          "parent_checkpoint_id": null,
+          "plan_sha256": "8493ba04bf6f8943c03306760a9402270b13b40c1d22563c48f8586437de4ec1",
+          "record_id": "p3",
+          "run_id": "run-84",
+          "sequence": 3
+        },
+        {
+          "effect_sha256": "066f3c30f147e480acb5198e97f453be77c359f351d16512c51347d20e88a6c0",
+          "evidence_id": "ev-8-absent",
+          "kind": "provider_evidence",
+          "operation_id": "op-22",
+          "provider": "provider-b",
+          "readback": "absent",
+          "record_id": "p4",
+          "revision": 8,
+          "sequence": 4
+        }
+      ],
+      "scope": {
+        "operation_id": "op-22",
+        "provider": "provider-b",
+        "run_id": "run-84",
+        "turn_id": "turn-parent"
+      },
+      "trace_id": "retry_authority_pending"
+    },
+    {
+      "records": [
+        {
+          "event_id": "evt-output",
+          "event_kind": "output",
+          "kind": "runtime_event",
+          "payload_sha256": "ebbef8615f8d26a2c818d8e9dc6b93d252d73377bcea19eb117166f5fedb58de",
+          "record_id": "e1",
+          "run_id": "run-7",
+          "sequence": 1,
+          "turn_id": "turn-parent"
+        },
+        {
+          "event_id": "evt-complete",
+          "event_kind": "completed",
+          "kind": "runtime_event",
+          "payload_sha256": "a4c3ed04a95a3da14a9d235c83d868bed7c0f45cf7f3faa751ee8f50598d2211",
+          "record_id": "e2",
+          "run_id": "run-7",
+          "sequence": 2,
+          "turn_id": "turn-parent"
+        }
+      ],
+      "scope": {
+        "operation_id": "op-unused",
+        "provider": "provider-c",
+        "run_id": "run-7",
+        "turn_id": "turn-parent"
+      },
+      "trace_id": "parent_turn_terminal"
+    }
+  ]
+}

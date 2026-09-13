@@ -1,0 +1,67 @@
+{
+  "artifacts": {
+    "baseline_traces": {
+      "path": "evals/trace_integrity_v1/BASELINE_TRACES.json",
+      "sha256": "9b2b62d25d849be3123c3b0212351e89c2876dbd8e861675a2a084e666f9c4c5",
+      "trace_count": 3
+    },
+    "mutation_corpus": {
+      "mutation_count": 15,
+      "path": "evals/trace_integrity_v1/MUTATIONS.json",
+      "sha256": "ef4f7eb8bdc8170afe15eb6ae4bf59c5bd677477dde1c0d8e398ee8aeb448af2"
+    },
+    "trace_schema": {
+      "path": "evals/trace_integrity_v1/TRACE_SCHEMA.json",
+      "sha256": "2d1281fc3c16dacca9eb2136c090417adeea160531b812e340a8a3fc6065a7cc"
+    }
+  },
+  "claim_boundary": {
+    "aggregate_detection_claim_allowed_before_two_reproducing_runs": false,
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "production_trace_integrity_claim_allowed": false,
+    "real_provider_claim_allowed": false
+  },
+  "detection_gates": {
+    "clean_trace_accept_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    },
+    "detector_error_count": {
+      "operator": "eq",
+      "threshold": 0
+    },
+    "false_negative_count": {
+      "operator": "eq",
+      "threshold": 0
+    },
+    "false_positive_count": {
+      "operator": "eq",
+      "threshold": 0
+    },
+    "mutation_detection_rate": {
+      "operator": "eq",
+      "threshold": 1.0
+    }
+  },
+  "detector": {
+    "callable": "agent_reliability_lab.trace_integrity:evaluate_trace_corpus",
+    "sha256": "d481d451106dbcf3f7fad7e89ce5aed12bdded26c179553150092524af0cd0e7",
+    "source_path": "src/agent_reliability_lab/trace_integrity.py"
+  },
+  "execution": {
+    "aggregate_publication_requires_frozen_protocol_commit": true,
+    "independent_runs_required": 2,
+    "normalized_output_byte_equal_required": true,
+    "result_path_pattern": "evals/trace_integrity_v1/artifacts/run-{run}.json"
+  },
+  "protocol_id": "trace-integrity-v1-20260913",
+  "purpose": "detect deterministic corruption of cross-layer coding-agent trace lineage without accepting malformed clean state",
+  "result_artifact": {
+    "must_be_absent_at_freeze": true,
+    "published_results_path": "evals/trace_integrity_v1/RESULTS.json"
+  },
+  "schema_version": "carl.trace-integrity-evaluation-protocol.v1",
+  "status": "frozen_unexecuted"
+}

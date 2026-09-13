@@ -153,6 +153,28 @@ The harness is executable, but no aggregate score is claimed by the freeze commi
 
 The later execution boundary reverified remote freeze commit `f11c5d441261fbbd07be23b806c53d7c685d8560`, preserved `PROTOCOL.json` and `SCENARIOS.json` byte-for-byte, and executed the exact manifest in two independent Python processes. Both normalized outputs have SHA-256 `31390b50cb0761a1c4c06f3c5783367f52fb9d4c15722f409bb5efcc1a24c203`. All predeclared gates pass: scenario 11/11, safety 11/11, convergence 8/8, fail-closed 7/7, duplicate-effect violations 0. `evals/reliability_v1/RESULTS.json` records the result and `verify_results.py` re-derives the disposition from the frozen thresholds. The claim boundary remains unchanged.
 
+## Eleventh milestone: frozen trace-integrity mutation protocol
+
+The aggregate reliability score covers behavior scenarios, but it does not test whether
+a cross-layer trace has been corrupted while moving between event, approval, effect,
+checkpoint, provider-evidence, and completion records. The next evaluation boundary
+therefore freezes the detector and mutation corpus **before aggregate detection outcomes**:
+
+- `TRACE_SCHEMA.json` fixes six canonical trace-record kinds and their cross-record invariants;
+- three synthetic clean traces cover completed recovery, pending retry authority, and scoped parent-turn events;
+- 15 deterministic mutations corrupt event identity/order, approval/effect binding, checkpoint lineage, provider revisions, or reconciliation completion;
+- the generic detector source is SHA-pinned alongside every evaluation input;
+- clean acceptance and mutation detection must each equal 1.0, with zero false positives, false negatives, or detector errors;
+- two independent normalized executions must be byte-identical before a result may be published.
+
+At this freeze boundary `RESULTS.json` is absent and the frozen corpus has not been
+executed through the aggregate evaluator. A later run must reverify the remote freeze
+commit and all hashes, execute the unchanged corpus twice, and publish a negative result
+rather than weaken gates after seeing outcomes. This remains synthetic local trace
+evidence, not a production tracing or provider claim.
+
+See `evals/trace_integrity_v1/README.md` for the frozen protocol and claim boundary.
+
 
 ## Run
 
