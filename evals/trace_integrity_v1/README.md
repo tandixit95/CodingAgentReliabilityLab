@@ -1,6 +1,6 @@
 # Frozen trace-integrity mutation evaluation v1
 
-This namespace freezes the next Coding Agent Reliability Lab evaluation **before aggregate mutation-detection outcomes are measured**. It asks a narrower question than the core reliability score: can one canonical cross-layer trace contract detect deterministic corruption of identity, approval/effect binding, checkpoint lineage, provider revisions, and reconciliation completion without rejecting clean traces?
+This namespace records a trace-integrity mutation evaluation for Coding Agent Reliability Lab. The detector, canonical cross-layer trace contract, clean baselines, mutation corpus, and detection gates were frozen at commit `cee88ebde76d67e99721796bf292f553f88fb5a3` **before aggregate detection outcomes were measured**; the unchanged frozen surface has now been executed twice and published.
 
 ## Frozen surface
 
@@ -18,18 +18,23 @@ Frozen SHA-256 identities:
 - clean baselines: `9b2b62d25d849be3123c3b0212351e89c2876dbd8e861675a2a084e666f9c4c5`
 - mutation corpus: `ef4f7eb8bdc8170afe15eb6ae4bf59c5bd677477dde1c0d8e398ee8aeb448af2`
 
-## Freeze boundary
+## Frozen boundary and published result
 
-`PROTOCOL.json` is `frozen_unexecuted`. `RESULTS.json` and aggregate run artifacts are intentionally absent. The freeze verifier checks artifact identities, corpus membership/order, detector bytes, mutation applicability, fixed gates, claim limits, and absence of an aggregate result, but it does **not** execute the frozen corpus through the detector.
+The immutable freeze commit records protocol status `frozen_unexecuted`, no `RESULTS.json`, all detector/input hashes, and every threshold before outcomes. On the later execution boundary, the exact remote freeze commit and frozen hashes were reverified before execution. `PROTOCOL.json`, `TRACE_SCHEMA.json`, `BASELINE_TRACES.json`, `MUTATIONS.json`, and the detector source were not changed after outcomes.
 
-Verify the freeze with:
+Two independent Python-process executions produced byte-identical normalized artifacts:
+
+- `artifacts/run-1.json`: `4d1486472eada40441a407c827495dd5cee89a8f348749f05a42ec8291baf164`
+- `artifacts/run-2.json`: `4d1486472eada40441a407c827495dd5cee89a8f348749f05a42ec8291baf164`
+
+The published aggregate disposition is **pass** under the predeclared gates: all 3 clean traces were accepted, all 15 frozen mutations were detected, false positives = 0, false negatives = 0, and detector errors = 0. The machine-readable publication is `RESULTS.json`.
+
+For the historical freeze boundary, inspect commit `cee88ebde76d67e99721796bf292f553f88fb5a3` and run `verify_protocol.py` there. In the current post-execution tree, verify the publication and unchanged frozen detector/inputs with:
 
 ```bash
-python evals/trace_integrity_v1/verify_protocol.py
+python evals/trace_integrity_v1/verify_results.py
 ```
-
-A later run must first verify the exact remote freeze commit and hashes, execute the unchanged corpus twice in independent Python processes, require byte-identical normalized output, and apply only the gates already frozen here. A negative result must be published rather than weakening the protocol after outcomes.
 
 ## Claim boundary
 
-This protocol is a deterministic local mutation evaluation. Freezing a detector and mutation corpus does not establish that every corruption will be detected, and it makes no production trace-integrity, production reliability, exactly-once, distributed-consensus, real-provider, throughput, latency, or model-quality claim. The baseline data is repository-authored synthetic trace metadata; no employer data, private telemetry, credentials, or third-party dataset payloads are included.
+This protocol is a deterministic local mutation evaluation over repository-authored synthetic trace metadata. Detecting these 15 frozen corruptions does not establish completeness against arbitrary or adversarial corruption and does not establish production trace integrity. It makes no production reliability, exactly-once, distributed-consensus, real-provider, throughput, latency, model-quality, employer-data, private-telemetry, or third-party-dataset claim.

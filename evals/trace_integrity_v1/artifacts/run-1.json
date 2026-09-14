@@ -1,0 +1,143 @@
+{
+  "clean_results": [
+    {
+      "accepted": true,
+      "trace_id": "retry_then_reconcile",
+      "violations": []
+    },
+    {
+      "accepted": true,
+      "trace_id": "retry_authority_pending",
+      "violations": []
+    },
+    {
+      "accepted": true,
+      "trace_id": "parent_turn_terminal",
+      "violations": []
+    }
+  ],
+  "metrics": {
+    "clean_trace_accept_rate": 1.0,
+    "clean_trace_count": 3,
+    "detector_error_count": 0,
+    "false_negative_count": 0,
+    "false_positive_count": 0,
+    "mutation_count": 15,
+    "mutation_detection_rate": 1.0
+  },
+  "mutation_results": [
+    {
+      "detected": true,
+      "mutation_id": "event_run_scope_graft",
+      "violations": [
+        "event_run_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "event_turn_scope_graft",
+      "violations": [
+        "event_turn_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "event_id_collision",
+      "violations": [
+        "event_id_duplicate"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "record_sequence_collision",
+      "violations": [
+        "record_sequence_not_strictly_increasing"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "approval_operation_swap",
+      "violations": [
+        "operation_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "effect_payload_hash_drift",
+      "violations": [
+        "approval_effect_binding_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "effect_fingerprint_drift",
+      "violations": [
+        "effect_fingerprint_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_parent_rewind",
+      "violations": [
+        "checkpoint_parent_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_sequence_gap",
+      "violations": [
+        "checkpoint_sequence_gap"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_plan_hash_drift",
+      "violations": [
+        "checkpoint_plan_drift"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "provider_revision_rollback",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch",
+        "provider_revision_rollback"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "provider_same_revision_conflict",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch",
+        "provider_same_revision_conflict"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_stale_evidence",
+      "violations": [
+        "completion_requires_present_evidence",
+        "completion_revision_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_revision_drift",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_effect_drift",
+      "violations": [
+        "completion_effect_fingerprint_mismatch",
+        "completion_evidence_effect_mismatch"
+      ]
+    }
+  ],
+  "schema_version": "carl.trace-integrity-result.v1"
+}

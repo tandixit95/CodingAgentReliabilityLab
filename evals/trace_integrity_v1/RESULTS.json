@@ -1,0 +1,214 @@
+{
+  "aggregate_disposition": "pass",
+  "claim_boundary": {
+    "aggregate_detection_claim_allowed_before_two_reproducing_runs": false,
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "production_trace_integrity_claim_allowed": false,
+    "real_provider_claim_allowed": false
+  },
+  "clean_results": [
+    {
+      "accepted": true,
+      "trace_id": "retry_then_reconcile",
+      "violations": []
+    },
+    {
+      "accepted": true,
+      "trace_id": "retry_authority_pending",
+      "violations": []
+    },
+    {
+      "accepted": true,
+      "trace_id": "parent_turn_terminal",
+      "violations": []
+    }
+  ],
+  "freeze_commit_sha": "cee88ebde76d67e99721796bf292f553f88fb5a3",
+  "frozen_artifacts": {
+    "baseline_traces_sha256": "9b2b62d25d849be3123c3b0212351e89c2876dbd8e861675a2a084e666f9c4c5",
+    "detector_sha256": "d481d451106dbcf3f7fad7e89ce5aed12bdded26c179553150092524af0cd0e7",
+    "mutation_corpus_sha256": "ef4f7eb8bdc8170afe15eb6ae4bf59c5bd677477dde1c0d8e398ee8aeb448af2",
+    "trace_schema_sha256": "2d1281fc3c16dacca9eb2136c090417adeea160531b812e340a8a3fc6065a7cc"
+  },
+  "frozen_gates": {
+    "clean_trace_accept_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    },
+    "detector_error_count": {
+      "actual": 0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 0
+    },
+    "false_negative_count": {
+      "actual": 0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 0
+    },
+    "false_positive_count": {
+      "actual": 0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 0
+    },
+    "mutation_detection_rate": {
+      "actual": 1.0,
+      "operator": "eq",
+      "passed": true,
+      "threshold": 1.0
+    }
+  },
+  "limitations": [
+    "Deterministic local mutation evaluation over repository-authored synthetic traces only; not a production trace-integrity measurement.",
+    "Detection of these 15 frozen mutations does not establish completeness against arbitrary or adversarial corruption.",
+    "No production reliability, exactly-once remote-effect, distributed-consensus, real-provider, throughput, latency, or model-quality claim."
+  ],
+  "metrics": {
+    "clean_trace_accept_rate": 1.0,
+    "clean_trace_count": 3,
+    "detector_error_count": 0,
+    "false_negative_count": 0,
+    "false_positive_count": 0,
+    "mutation_count": 15,
+    "mutation_detection_rate": 1.0
+  },
+  "mutation_results": [
+    {
+      "detected": true,
+      "mutation_id": "event_run_scope_graft",
+      "violations": [
+        "event_run_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "event_turn_scope_graft",
+      "violations": [
+        "event_turn_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "event_id_collision",
+      "violations": [
+        "event_id_duplicate"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "record_sequence_collision",
+      "violations": [
+        "record_sequence_not_strictly_increasing"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "approval_operation_swap",
+      "violations": [
+        "operation_scope_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "effect_payload_hash_drift",
+      "violations": [
+        "approval_effect_binding_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "effect_fingerprint_drift",
+      "violations": [
+        "effect_fingerprint_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_parent_rewind",
+      "violations": [
+        "checkpoint_parent_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_sequence_gap",
+      "violations": [
+        "checkpoint_sequence_gap"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "checkpoint_plan_hash_drift",
+      "violations": [
+        "checkpoint_plan_drift"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "provider_revision_rollback",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch",
+        "provider_revision_rollback"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "provider_same_revision_conflict",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch",
+        "provider_same_revision_conflict"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_stale_evidence",
+      "violations": [
+        "completion_requires_present_evidence",
+        "completion_revision_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_revision_drift",
+      "violations": [
+        "completion_not_latest_provider_revision",
+        "completion_revision_mismatch"
+      ]
+    },
+    {
+      "detected": true,
+      "mutation_id": "completion_effect_drift",
+      "violations": [
+        "completion_effect_fingerprint_mismatch",
+        "completion_evidence_effect_mismatch"
+      ]
+    }
+  ],
+  "protocol_id": "trace-integrity-v1-20260913",
+  "protocol_sha256": "13c86ce5b0ad1a641d21491838780127d3b2d69e8ad1e2b9abbad6bdaf5a9ea4",
+  "reproduction": {
+    "independent_runs_recorded": 2,
+    "independent_runs_required": 2,
+    "normalized_output_byte_identical": true,
+    "normalized_output_sha256": "4d1486472eada40441a407c827495dd5cee89a8f348749f05a42ec8291baf164"
+  },
+  "run_artifacts": [
+    {
+      "path": "evals/trace_integrity_v1/artifacts/run-1.json",
+      "sha256": "4d1486472eada40441a407c827495dd5cee89a8f348749f05a42ec8291baf164"
+    },
+    {
+      "path": "evals/trace_integrity_v1/artifacts/run-2.json",
+      "sha256": "4d1486472eada40441a407c827495dd5cee89a8f348749f05a42ec8291baf164"
+    }
+  ],
+  "schema_version": "carl.trace-integrity-publication.v1"
+}
