@@ -15,6 +15,7 @@ interruptions without silently authorizing a different operation.
 [competing reconcilers](docs/COMPETING_RECONCILERS.md) ·
 [frozen reliability evaluation](evals/reliability_v1/README.md) ·
 [frozen trace-integrity mutation evaluation](evals/trace_integrity_v1/README.md) ·
+[combined evidence release gate](evals/release_gate_v1/README.md) ·
 [simulation milestones](docs/SIMULATION_MILESTONES.md) · [tests](tests)
 
 ## What is implemented
@@ -34,6 +35,7 @@ interruptions without silently authorizing a different operation.
 | Competing reconcilers | Two restarted workers race one revision-bound retry; one commits and the stale worker re-reads PRESENT | Separate SQLite provider + reconciliation stores, two child processes |
 | Frozen reliability evaluation | 11 machine-readable scenarios + fixed safety/convergence/fail-closed gates, frozen before aggregate execution; two later byte-identical runs pass every predeclared gate | Deterministic local evaluation protocol |
 | Frozen trace-integrity mutation evaluation | Canonical cross-layer trace schema + 3 clean traces + 15 deterministic corruptions + fixed detector/gates, frozen before aggregate detection; two later byte-identical runs accept 3/3 clean traces and detect 15/15 mutations | Deterministic local mutation protocol |
+| Combined evidence release gate | Exact reliability + trace-integrity publication identities, fixed fail-closed composition criteria, and a frozen evaluator before any combined release-readiness execution | Deterministic local evidence-composition protocol |
 
 The naive split-transaction baseline duplicates the local effect after a crash.
 The transactional version either rolls back the uncommitted effect or recognizes

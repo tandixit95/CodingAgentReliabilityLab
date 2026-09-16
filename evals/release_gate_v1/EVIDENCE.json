@@ -1,0 +1,32 @@
+{
+  "evidence_set_id": "combined-release-evidence-v1-20260916",
+  "schema_version": "carl.combined-evidence-manifest.v1",
+  "sources": [
+    {
+      "freeze_commit_sha": "f11c5d441261fbbd07be23b806c53d7c685d8560",
+      "id": "core_reliability_v1",
+      "protocol_id": "core-reliability-v1-20260911",
+      "protocol_path": "evals/reliability_v1/PROTOCOL.json",
+      "protocol_sha256": "bba37a4f3f5733bd51af35eae1286090dcd36929fbaf711a28ffccc0735819df",
+      "result_commit_sha": "be63a2d88dc5537386dca70977bd2d258b80e1cc",
+      "result_path": "evals/reliability_v1/RESULTS.json",
+      "result_schema_version": "carl.reliability-evaluation-publication.v1",
+      "result_sha256": "f0cfa595075f3c4d5c97c68c837ff7498d0f10eb78ec2ac80edbf5c09f8abeb9",
+      "result_verifier_path": "evals/reliability_v1/verify_results.py",
+      "result_verifier_sha256": "26e93427b03347f4323b7cdbcc2bb7b2bdeae8ee528f90c58b91404622ce7cc5"
+    },
+    {
+      "freeze_commit_sha": "cee88ebde76d67e99721796bf292f553f88fb5a3",
+      "id": "trace_integrity_v1",
+      "protocol_id": "trace-integrity-v1-20260913",
+      "protocol_path": "evals/trace_integrity_v1/PROTOCOL.json",
+      "protocol_sha256": "13c86ce5b0ad1a641d21491838780127d3b2d69e8ad1e2b9abbad6bdaf5a9ea4",
+      "result_commit_sha": "7d358de55cfbb50b8a5f8162d689f352a6b9c4f4",
+      "result_path": "evals/trace_integrity_v1/RESULTS.json",
+      "result_schema_version": "carl.trace-integrity-publication.v1",
+      "result_sha256": "36e49c3c225b1b54cb8def2b99a87f96815dec3943b35a34b64d9e12adfe71c8",
+      "result_verifier_path": "evals/trace_integrity_v1/verify_results.py",
+      "result_verifier_sha256": "55709890a14cb5af2aaab693ecd515f9d737fd874ccebfdf0e34aefbc68ca741"
+    }
+  ]
+}

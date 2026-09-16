@@ -1,0 +1,45 @@
+{
+  "claim_boundary": {
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "production_trace_integrity_claim_allowed": false,
+    "real_provider_claim_allowed": false,
+    "release_ready_claim_allowed_before_two_reproducing_runs": false
+  },
+  "evaluator": {
+    "path": "evals/release_gate_v1/evaluate.py",
+    "sha256": "a0a2ca7c771312d70b4bd5f582c0db0ec272855c67e2d95aa136c03745e106c4"
+  },
+  "evidence_manifest": {
+    "path": "evals/release_gate_v1/EVIDENCE.json",
+    "sha256": "99438a2c2ab2cef784df4d3a51ad7f114d695509d657ca25c502f8d74d15397f",
+    "source_count": 2
+  },
+  "execution": {
+    "aggregate_publication_requires_frozen_protocol_commit": true,
+    "independent_runs_required": 2,
+    "normalized_output_byte_equal_required": true,
+    "result_path_pattern": "evals/release_gate_v1/artifacts/run-{run}.json"
+  },
+  "protocol_id": "combined-evidence-release-v1-20260916",
+  "purpose": "compose already-published reliability and trace-integrity evidence through a fail-closed release-readiness gate",
+  "release_criteria": {
+    "minimum_source_independent_runs": 2,
+    "require_current_result_bytes_match_pinned_commit": true,
+    "require_exact_result_commit_identity": true,
+    "require_source_frozen_gates_all_pass": true,
+    "require_source_independent_runs_satisfied": true,
+    "require_source_normalized_output_byte_identical": true,
+    "require_source_result_protocol_identity_match_manifest": true,
+    "require_source_result_verifier_pass": true,
+    "required_source_count": 2,
+    "required_source_disposition": "pass"
+  },
+  "result_artifact": {
+    "must_be_absent_at_freeze": true,
+    "published_results_path": "evals/release_gate_v1/RESULTS.json"
+  },
+  "schema_version": "carl.combined-evidence-release-protocol.v1",
+  "status": "frozen_unexecuted"
+}
