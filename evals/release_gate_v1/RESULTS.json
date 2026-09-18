@@ -1,0 +1,99 @@
+{
+  "claim_boundary": {
+    "distributed_consensus_claim_allowed": false,
+    "exactly_once_claim_allowed": false,
+    "production_reliability_claim_allowed": false,
+    "production_trace_integrity_claim_allowed": false,
+    "real_provider_claim_allowed": false,
+    "release_ready_claim_allowed_before_two_reproducing_runs": false
+  },
+  "evaluator_sha256": "a0a2ca7c771312d70b4bd5f582c0db0ec272855c67e2d95aa136c03745e106c4",
+  "evidence_manifest_sha256": "99438a2c2ab2cef784df4d3a51ad7f114d695509d657ca25c502f8d74d15397f",
+  "freeze_commit_sha": "ac90e062d55f51afbf54eb8aa9ce0134b902377b",
+  "limitations": [
+    "Combined readiness applies only to the two exact deterministic local evidence publications pinned by the frozen manifest.",
+    "No production reliability, production trace integrity, exactly-once remote-effect, distributed-consensus, real-provider, model-quality, throughput, latency, or adoption claim."
+  ],
+  "metrics": {
+    "required_source_count_satisfied": true,
+    "source_count": 2,
+    "sources_failed": 0,
+    "sources_passed": 2
+  },
+  "protocol_id": "combined-evidence-release-v1-20260916",
+  "protocol_sha256": "3aea2286f57b832490bbe85479d042ffa525877dd99d521f69286e6494097ca1",
+  "release_ready": true,
+  "reproduction": {
+    "independent_runs_recorded": 2,
+    "independent_runs_required": 2,
+    "normalized_output_byte_identical": true,
+    "normalized_output_sha256": "9f22ca75e990e24ab5d95e52c89aef77ac2a9dfa2582863919b9f6c746502b62"
+  },
+  "run_artifacts": [
+    {
+      "path": "evals/release_gate_v1/artifacts/run-1.json",
+      "sha256": "9f22ca75e990e24ab5d95e52c89aef77ac2a9dfa2582863919b9f6c746502b62"
+    },
+    {
+      "path": "evals/release_gate_v1/artifacts/run-2.json",
+      "sha256": "9f22ca75e990e24ab5d95e52c89aef77ac2a9dfa2582863919b9f6c746502b62"
+    }
+  ],
+  "schema_version": "carl.combined-evidence-release-publication.v1",
+  "source_results": [
+    {
+      "checks": {
+        "all_frozen_source_gates_pass": true,
+        "protocol_current_sha256_matches": true,
+        "protocol_pinned_commit_sha256_matches": true,
+        "protocol_present": true,
+        "reproduction_object_present": true,
+        "result_current_sha256_matches": true,
+        "result_freeze_commit_sha_matches": true,
+        "result_json_valid": true,
+        "result_pinned_commit_sha256_matches": true,
+        "result_present": true,
+        "result_protocol_id_matches": true,
+        "result_protocol_sha256_matches": true,
+        "result_schema_version_matches": true,
+        "result_verifier_current_sha256_matches": true,
+        "result_verifier_pinned_commit_sha256_matches": true,
+        "result_verifier_present": true,
+        "source_disposition_passes": true,
+        "source_independent_runs_satisfied": true,
+        "source_normalized_output_byte_identical": true,
+        "source_result_verifier_passes": true
+      },
+      "errors": [],
+      "passed": true,
+      "source_id": "core_reliability_v1"
+    },
+    {
+      "checks": {
+        "all_frozen_source_gates_pass": true,
+        "protocol_current_sha256_matches": true,
+        "protocol_pinned_commit_sha256_matches": true,
+        "protocol_present": true,
+        "reproduction_object_present": true,
+        "result_current_sha256_matches": true,
+        "result_freeze_commit_sha_matches": true,
+        "result_json_valid": true,
+        "result_pinned_commit_sha256_matches": true,
+        "result_present": true,
+        "result_protocol_id_matches": true,
+        "result_protocol_sha256_matches": true,
+        "result_schema_version_matches": true,
+        "result_verifier_current_sha256_matches": true,
+        "result_verifier_pinned_commit_sha256_matches": true,
+        "result_verifier_present": true,
+        "source_disposition_passes": true,
+        "source_independent_runs_satisfied": true,
+        "source_normalized_output_byte_identical": true,
+        "source_result_verifier_passes": true
+      },
+      "errors": [],
+      "passed": true,
+      "source_id": "trace_integrity_v1"
+    }
+  ]
+}

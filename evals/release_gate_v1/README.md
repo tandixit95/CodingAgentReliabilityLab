@@ -38,3 +38,11 @@ python -m pytest tests/test_release_gate_protocol.py -q
 ```
 
 Do not execute `evaluate.py` against the pinned production evidence until a later run has independently reverified this frozen boundary.
+
+## Published aggregate result
+
+The unchanged frozen evaluator was executed twice in independent Python processes after the freeze boundary was reverified. The normalized outputs are byte-identical at SHA-256 `9f22ca75e990e24ab5d95e52c89aef77ac2a9dfa2582863919b9f6c746502b62`. Both pinned source publications passed every frozen identity, verifier, gate, disposition, and reproduction check, so the predeclared combined result is `release_ready=true`.
+
+This result is intentionally narrow: it says the two exact deterministic local evidence publications satisfy the frozen composition gate. It does not establish production reliability, production trace integrity, exactly-once remote effects, distributed consensus, real-provider behavior, model quality, throughput, latency, or adoption.
+
+Verify the published result with `python evals/release_gate_v1/verify_results.py`.

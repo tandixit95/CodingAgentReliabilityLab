@@ -1,0 +1,68 @@
+{
+  "evidence_set_id": "combined-release-evidence-v1-20260916",
+  "metrics": {
+    "required_source_count_satisfied": true,
+    "source_count": 2,
+    "sources_failed": 0,
+    "sources_passed": 2
+  },
+  "protocol_id": "combined-evidence-release-v1-20260916",
+  "release_ready": true,
+  "schema_version": "carl.combined-evidence-release-run.v1",
+  "source_results": [
+    {
+      "checks": {
+        "all_frozen_source_gates_pass": true,
+        "protocol_current_sha256_matches": true,
+        "protocol_pinned_commit_sha256_matches": true,
+        "protocol_present": true,
+        "reproduction_object_present": true,
+        "result_current_sha256_matches": true,
+        "result_freeze_commit_sha_matches": true,
+        "result_json_valid": true,
+        "result_pinned_commit_sha256_matches": true,
+        "result_present": true,
+        "result_protocol_id_matches": true,
+        "result_protocol_sha256_matches": true,
+        "result_schema_version_matches": true,
+        "result_verifier_current_sha256_matches": true,
+        "result_verifier_pinned_commit_sha256_matches": true,
+        "result_verifier_present": true,
+        "source_disposition_passes": true,
+        "source_independent_runs_satisfied": true,
+        "source_normalized_output_byte_identical": true,
+        "source_result_verifier_passes": true
+      },
+      "errors": [],
+      "passed": true,
+      "source_id": "core_reliability_v1"
+    },
+    {
+      "checks": {
+        "all_frozen_source_gates_pass": true,
+        "protocol_current_sha256_matches": true,
+        "protocol_pinned_commit_sha256_matches": true,
+        "protocol_present": true,
+        "reproduction_object_present": true,
+        "result_current_sha256_matches": true,
+        "result_freeze_commit_sha_matches": true,
+        "result_json_valid": true,
+        "result_pinned_commit_sha256_matches": true,
+        "result_present": true,
+        "result_protocol_id_matches": true,
+        "result_protocol_sha256_matches": true,
+        "result_schema_version_matches": true,
+        "result_verifier_current_sha256_matches": true,
+        "result_verifier_pinned_commit_sha256_matches": true,
+        "result_verifier_present": true,
+        "source_disposition_passes": true,
+        "source_independent_runs_satisfied": true,
+        "source_normalized_output_byte_identical": true,
+        "source_result_verifier_passes": true
+      },
+      "errors": [],
+      "passed": true,
+      "source_id": "trace_integrity_v1"
+    }
+  ]
+}
