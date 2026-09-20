@@ -52,3 +52,44 @@ def test_current_token_can_write_repeatedly_without_minting_new_authority():
     second = fenced_write(first, token, "two")
     assert second.value == "two"
     assert second.epoch == token.epoch == 1
+
+
+def test_persistent_epoch_survives_store_restart(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    database = tmp_path / "fencing.sqlite3"
+    first_store = PersistentFencingStore(database)
+    stale = first_store.acquire("repo", "publish")
+
+    restarted_store = PersistentFencingStore(database)
+    current = restarted_store.acquire("repo", "publish")
+
+    with pytest.raises(StaleFencingToken, match="superseded"):
+        first_store.write(stale, "stale publication")
+
+    restarted_store.write(current, "current publication")
+    assert PersistentFencingStore(database).state("repo") == FencedState(
+        "repo", epoch=2, operation_id="publish", value="current publication"
+    )
+
+
+def test_persistent_epoch_never_resets_when_resource_is_reacquired(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    database = tmp_path / "fencing.sqlite3"
+    epochs = []
+    for _ in range(4):
+        store = PersistentFencingStore(database)
+        epochs.append(store.acquire("worktree", "edit").epoch)
+
+    assert epochs == [1, 2, 3, 4]
+
+
+def test_persistent_store_fails_closed_for_unknown_resource(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    store = PersistentFencingStore(tmp_path / "fencing.sqlite3")
+    token = FencingToken("missing", "write", 1)
+
+    with pytest.raises(FencingConflict, match="no current authority"):
+        store.write(token, "payload")

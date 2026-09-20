@@ -9,6 +9,7 @@ therefore cannot commit merely because it still holds old local state.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 
 class StaleFencingToken(RuntimeError):
@@ -68,3 +69,91 @@ def fenced_write(state: FencedState, token: FencingToken, value: str) -> FencedS
     if token.operation_id != state.operation_id:
         raise FencingConflict("fencing token is not bound to the current operation")
     return FencedState(state.resource, state.epoch, state.operation_id, value)
+
+
+class PersistentFencingStore:
+    """SQLite-backed fencing epochs that survive executor restart.
+
+    Authority acquisition and fenced mutation both serialize through the same
+    database row.  This models durable write-side fencing on one local SQLite
+    store; it is not a distributed lease or consensus service.
+    """
+
+    def __init__(self, database: str | Path) -> None:
+        import sqlite3
+
+        self.database = Path(database)
+        self.database.parent.mkdir(parents=True, exist_ok=True)
+        with sqlite3.connect(self.database) as connection:
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS fencing_state (
+                    resource TEXT PRIMARY KEY,
+                    epoch INTEGER NOT NULL CHECK (epoch >= 0),
+                    operation_id TEXT,
+                    value TEXT
+                )
+                """
+            )
+
+    def acquire(self, resource: str, operation_id: str) -> FencingToken:
+        import sqlite3
+
+        if not resource.strip() or not operation_id.strip():
+            raise ValueError("resource and operation_id must be nonempty")
+        with sqlite3.connect(self.database, isolation_level=None) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT epoch FROM fencing_state WHERE resource = ?", (resource,)
+            ).fetchone()
+            epoch = (row[0] if row else 0) + 1
+            connection.execute(
+                """
+                INSERT INTO fencing_state(resource, epoch, operation_id, value)
+                VALUES (?, ?, ?, NULL)
+                ON CONFLICT(resource) DO UPDATE SET
+                    epoch = excluded.epoch,
+                    operation_id = excluded.operation_id
+                """,
+                (resource, epoch, operation_id),
+            )
+            connection.commit()
+        return FencingToken(resource, operation_id, epoch)
+
+    def write(self, token: FencingToken, value: str) -> None:
+        import sqlite3
+
+        with sqlite3.connect(self.database, isolation_level=None) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT epoch, operation_id FROM fencing_state WHERE resource = ?",
+                (token.resource,),
+            ).fetchone()
+            if row is None:
+                connection.rollback()
+                raise FencingConflict("fencing resource has no current authority")
+            epoch, operation_id = row
+            if token.epoch != epoch:
+                connection.rollback()
+                raise StaleFencingToken(
+                    "fencing token was superseded; stale executor must re-acquire authority"
+                )
+            if token.operation_id != operation_id:
+                connection.rollback()
+                raise FencingConflict("fencing token is not bound to the current operation")
+            connection.execute(
+                "UPDATE fencing_state SET value = ? WHERE resource = ?", (value, token.resource)
+            )
+            connection.commit()
+
+    def state(self, resource: str) -> FencedState:
+        import sqlite3
+
+        with sqlite3.connect(self.database) as connection:
+            row = connection.execute(
+                "SELECT epoch, operation_id, value FROM fencing_state WHERE resource = ?",
+                (resource,),
+            ).fetchone()
+        if row is None:
+            return FencedState(resource)
+        return FencedState(resource, row[0], row[1], row[2])

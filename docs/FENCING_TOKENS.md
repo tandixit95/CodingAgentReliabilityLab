@@ -13,3 +13,9 @@ python -m pytest tests/test_fencing_tokens.py -v
 ```
 
 The tests cover stale-worker rejection after authority transfer, restart with an old token, cross-resource misuse, changed-operation misuse, and valid repeated writes under the current authority epoch.
+
+## Durable epoch boundary
+
+The in-memory model is useful only while the authoritative state itself survives. If an executor restarts and reconstructs authority from a fresh epoch counter, an old token can become current again. `PersistentFencingStore` therefore stores the resource epoch in SQLite and advances it inside a serialized transaction. A restarted store observes the prior epoch before issuing newer authority, and a stale pre-restart token remains fenced out at the write boundary.
+
+This closes one specific restart hole for a **single local SQLite authority store**. It still does not provide a distributed lease, clock, failure detector, consensus, cross-database atomicity, or protection when an external side effect ignores the fencing token.
