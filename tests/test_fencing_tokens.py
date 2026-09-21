@@ -1,3 +1,5 @@
+import multiprocessing
+
 import pytest
 
 from agent_reliability_lab.fencing import (
@@ -8,6 +10,14 @@ from agent_reliability_lab.fencing import (
     acquire_authority,
     fenced_write,
 )
+
+
+def _acquire_in_process(database, resource, operation_id, start_event, queue):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    start_event.wait(timeout=10)
+    token = PersistentFencingStore(database).acquire(resource, operation_id)
+    queue.put((token.resource, token.operation_id, token.epoch))
 
 
 def test_superseded_executor_cannot_commit_after_new_authority_is_issued():
@@ -93,3 +103,44 @@ def test_persistent_store_fails_closed_for_unknown_resource(tmp_path):
 
     with pytest.raises(FencingConflict, match="no current authority"):
         store.write(token, "payload")
+
+
+def test_persistent_store_serializes_competing_process_authority(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    database = tmp_path / "fencing.sqlite3"
+    context = multiprocessing.get_context("spawn")
+    start_event = context.Event()
+    queue = context.Queue()
+    processes = [
+        context.Process(
+            target=_acquire_in_process,
+            args=(database, "shared-repo", f"worker-{index}", start_event, queue),
+        )
+        for index in range(6)
+    ]
+    for process in processes:
+        process.start()
+    start_event.set()
+
+    results = [queue.get(timeout=15) for _ in processes]
+    for process in processes:
+        process.join(timeout=15)
+        assert process.exitcode == 0
+
+    tokens = [FencingToken(*result) for result in results]
+    assert sorted(token.epoch for token in tokens) == [1, 2, 3, 4, 5, 6]
+
+    current = max(tokens, key=lambda token: token.epoch)
+    stale = min(tokens, key=lambda token: token.epoch)
+    store = PersistentFencingStore(database)
+    with pytest.raises(StaleFencingToken, match="superseded"):
+        store.write(stale, "stale process result")
+
+    store.write(current, "winning process result")
+    assert store.state("shared-repo") == FencedState(
+        "shared-repo",
+        epoch=6,
+        operation_id=current.operation_id,
+        value="winning process result",
+    )
