@@ -1,4 +1,6 @@
 import multiprocessing
+import os
+import sqlite3
 
 import pytest
 
@@ -18,6 +20,21 @@ def _acquire_in_process(database, resource, operation_id, start_event, queue):
     start_event.wait(timeout=10)
     token = PersistentFencingStore(database).acquire(resource, operation_id)
     queue.put((token.resource, token.operation_id, token.epoch))
+
+
+def _crash_during_authority_transaction(database, resource, started_event):
+    connection = sqlite3.connect(database, isolation_level=None)
+    connection.execute("BEGIN IMMEDIATE")
+    row = connection.execute(
+        "SELECT epoch FROM fencing_state WHERE resource = ?", (resource,)
+    ).fetchone()
+    epoch = (row[0] if row else 0) + 1
+    connection.execute(
+        "UPDATE fencing_state SET epoch = ?, operation_id = ? WHERE resource = ?",
+        (epoch, "crashed-worker", resource),
+    )
+    started_event.set()
+    os._exit(73)
 
 
 def test_superseded_executor_cannot_commit_after_new_authority_is_issued():
@@ -143,4 +160,33 @@ def test_persistent_store_serializes_competing_process_authority(tmp_path):
         epoch=6,
         operation_id=current.operation_id,
         value="winning process result",
+    )
+
+
+def test_crashed_authority_transaction_rolls_back_before_next_acquire(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    database = tmp_path / "fencing.sqlite3"
+    store = PersistentFencingStore(database)
+    first = store.acquire("repo", "first-worker")
+    assert first.epoch == 1
+
+    context = multiprocessing.get_context("spawn")
+    started_event = context.Event()
+    process = context.Process(
+        target=_crash_during_authority_transaction,
+        args=(database, "repo", started_event),
+    )
+    process.start()
+    assert started_event.wait(timeout=10)
+    process.join(timeout=10)
+    assert process.exitcode == 73
+
+    # The uncommitted epoch-2 mutation died with the process. The next
+    # acquisition must observe the last committed epoch and issue epoch 2.
+    recovered = PersistentFencingStore(database).acquire("repo", "recovery-worker")
+    assert recovered.epoch == 2
+    PersistentFencingStore(database).write(recovered, "recovered result")
+    assert PersistentFencingStore(database).state("repo") == FencedState(
+        "repo", epoch=2, operation_id="recovery-worker", value="recovered result"
     )

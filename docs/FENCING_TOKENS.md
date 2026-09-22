@@ -23,3 +23,9 @@ This closes one specific restart hole for a **single local SQLite authority stor
 ## Competing-process boundary
 
 The persistent store is also exercised with six independent Python processes released against the same SQLite resource at once. `BEGIN IMMEDIATE` serializes those authority acquisitions into unique epochs `1..6`; after contention settles, the lowest epoch is rejected as stale and only the highest epoch can write. This demonstrates local cross-process serialization through one SQLite database file. It does **not** extend the claim to multiple database replicas, network partitions, distributed consensus, or external systems that do not enforce the token.
+
+## Crash-during-acquisition boundary
+
+A process can die after taking SQLite's write lock but before committing a newly issued authority epoch. The proof suite now kills a spawned process from inside that transaction. SQLite rolls the uncommitted epoch change back when the process exits; the next store acquisition observes the last committed epoch, issues the next epoch exactly once, and can perform the fenced write.
+
+This demonstrates local crash recovery for an uncommitted authority transaction in one SQLite database file. It does **not** prove safety if the database file itself is restored to an older snapshot, corrupted, replicated asynchronously, or replaced by storage that does not preserve SQLite's transaction semantics.
