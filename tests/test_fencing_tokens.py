@@ -19,7 +19,7 @@ def _acquire_in_process(database, resource, operation_id, start_event, queue):
 
     start_event.wait(timeout=10)
     token = PersistentFencingStore(database).acquire(resource, operation_id)
-    queue.put((token.resource, token.operation_id, token.epoch))
+    queue.put((token.resource, token.operation_id, token.epoch, token.store_generation))
 
 
 def _crash_during_authority_transaction(database, resource, started_event):
@@ -116,10 +116,29 @@ def test_persistent_store_fails_closed_for_unknown_resource(tmp_path):
     from agent_reliability_lab.fencing import PersistentFencingStore
 
     store = PersistentFencingStore(tmp_path / "fencing.sqlite3")
-    token = FencingToken("missing", "write", 1)
+    token = FencingToken("missing", "write", 1, store.store_generation)
 
     with pytest.raises(FencingConflict, match="no current authority"):
         store.write(token, "payload")
+
+
+def test_token_cannot_cross_persistent_store_generation(tmp_path):
+    from agent_reliability_lab.fencing import PersistentFencingStore
+
+    first_store = PersistentFencingStore(tmp_path / "first.sqlite3")
+    second_store = PersistentFencingStore(tmp_path / "second.sqlite3")
+    first = first_store.acquire("repo", "publish")
+    second = second_store.acquire("repo", "publish")
+
+    assert first.epoch == second.epoch == 1
+    assert first.store_generation != second.store_generation
+    with pytest.raises(FencingConflict, match="different authority-store generation"):
+        second_store.write(first, "cross-store stale publication")
+
+    second_store.write(second, "current publication")
+    assert second_store.state("repo") == FencedState(
+        "repo", epoch=1, operation_id="publish", value="current publication"
+    )
 
 
 def test_persistent_store_serializes_competing_process_authority(tmp_path):

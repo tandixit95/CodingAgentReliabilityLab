@@ -25,12 +25,15 @@ class FencingToken:
     resource: str
     operation_id: str
     epoch: int
+    store_generation: str | None = None
 
     def __post_init__(self) -> None:
         if not self.resource.strip() or not self.operation_id.strip():
             raise ValueError("resource and operation_id must be nonempty")
         if self.epoch <= 0:
             raise ValueError("epoch must be positive")
+        if self.store_generation is not None and not self.store_generation.strip():
+            raise ValueError("store_generation must be nonempty when present")
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,6 +90,20 @@ class PersistentFencingStore:
         with sqlite3.connect(self.database) as connection:
             connection.execute(
                 """
+                CREATE TABLE IF NOT EXISTS fencing_store_metadata (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    generation TEXT NOT NULL
+                )
+                """
+            )
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO fencing_store_metadata(singleton, generation)
+                VALUES (1, lower(hex(randomblob(16))))
+                """
+            )
+            connection.execute(
+                """
                 CREATE TABLE IF NOT EXISTS fencing_state (
                     resource TEXT PRIMARY KEY,
                     epoch INTEGER NOT NULL CHECK (epoch >= 0),
@@ -95,6 +112,9 @@ class PersistentFencingStore:
                 )
                 """
             )
+            self.store_generation = connection.execute(
+                "SELECT generation FROM fencing_store_metadata WHERE singleton = 1"
+            ).fetchone()[0]
 
     def acquire(self, resource: str, operation_id: str) -> FencingToken:
         import sqlite3
@@ -103,6 +123,14 @@ class PersistentFencingStore:
             raise ValueError("resource and operation_id must be nonempty")
         with sqlite3.connect(self.database, isolation_level=None) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            generation = connection.execute(
+                "SELECT generation FROM fencing_store_metadata WHERE singleton = 1"
+            ).fetchone()
+            if generation is None or self.store_generation != generation[0]:
+                connection.rollback()
+                raise FencingConflict(
+                    "authority store was replaced; reopen it before acquiring authority"
+                )
             row = connection.execute(
                 "SELECT epoch FROM fencing_state WHERE resource = ?", (resource,)
             ).fetchone()
@@ -118,13 +146,21 @@ class PersistentFencingStore:
                 (resource, epoch, operation_id),
             )
             connection.commit()
-        return FencingToken(resource, operation_id, epoch)
+        return FencingToken(resource, operation_id, epoch, self.store_generation)
 
     def write(self, token: FencingToken, value: str) -> None:
         import sqlite3
 
         with sqlite3.connect(self.database, isolation_level=None) as connection:
             connection.execute("BEGIN IMMEDIATE")
+            generation = connection.execute(
+                "SELECT generation FROM fencing_store_metadata WHERE singleton = 1"
+            ).fetchone()
+            if generation is None or token.store_generation != generation[0]:
+                connection.rollback()
+                raise FencingConflict(
+                    "fencing token belongs to a different authority-store generation"
+                )
             row = connection.execute(
                 "SELECT epoch, operation_id FROM fencing_state WHERE resource = ?",
                 (token.resource,),

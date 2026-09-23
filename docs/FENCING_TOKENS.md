@@ -29,3 +29,9 @@ The persistent store is also exercised with six independent Python processes rel
 A process can die after taking SQLite's write lock but before committing a newly issued authority epoch. The proof suite now kills a spawned process from inside that transaction. SQLite rolls the uncommitted epoch change back when the process exits; the next store acquisition observes the last committed epoch, issues the next epoch exactly once, and can perform the fenced write.
 
 This demonstrates local crash recovery for an uncommitted authority transaction in one SQLite database file. It does **not** prove safety if the database file itself is restored to an older snapshot, corrupted, replicated asynchronously, or replaced by storage that does not preserve SQLite's transaction semantics.
+
+## Authority-store identity boundary
+
+Numeric epochs are only comparable inside one authority-store history. Two independent SQLite stores can both issue epoch `1` for the same resource and operation, so an epoch-only token is not sufficient to distinguish their authority. Persistent tokens now carry a store-generation identity created with the database. The write boundary validates that identity before comparing the resource epoch, preventing a token minted by one store from authorizing a write in another store even when resource, operation, and epoch are identical.
+
+This closes cross-store token collision for this local model and provides a generation boundary that can distinguish independently initialized stores. The generation is randomly initialized, so practical uniqueness is assumed rather than globally coordinated. This does **not** prove safety for restoration of an older snapshot that preserves the same generation, database corruption, replica rollback, distributed consensus, or external systems that ignore the token.
